@@ -477,6 +477,7 @@
     <div class="info-section">
       <p class="info-label">A note from us</p>
       <div class="message-block">
+        <span id="order-notes-display"></span>
         Film has this funny way of making ordinary moments feel eternal. We take that seriously around here, even if we don't always look like it. <strong>Hope your scans are everything you were waiting for.</strong>
         <br><br>
         Any questions about your order? We're always here.
@@ -559,6 +560,11 @@
 
       if (order) {
         document.getElementById('order-display').textContent = order;
+      }
+      const notes = params.get('notes');
+      if (notes) {
+        const notesEl = document.getElementById('order-notes-display');
+        notesEl.innerHTML = `<span style="display:block; padding:12px 16px; margin-bottom:16px; background:#161616; border-left:2px solid #444; border-radius:1px; font-style:normal; font-size:14px; color:var(--off-white); line-height:1.7;">📋 <strong>Order Note:</strong> ${notes}</span>`;
       }
       if (name) {
         document.querySelector('.ready-name').textContent = name;
