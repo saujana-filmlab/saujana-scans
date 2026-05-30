@@ -222,8 +222,8 @@ function Dispatch({customers, onOrderSaved, prefill, clearPrefill}) {
   function openGmail() {
     if (!result) return;
     const r = result;
-    const sub = encodeURIComponent("Your scans are ready — Saujana Film Lab Bali");
-    const body = encodeURIComponent(`Hi ${r.custName}! Your scans are ready 🎞️\n\nOrder: ${r.orderNumber}\n\n${r.url}\n\nLink active 7 days. WhatsApp: +62 822 5131 8377\n\nSaujana Film Lab, Bali`);
+    const sub = encodeURIComponent(`[${r.orderNumber}] Your scans are ready - Saujana Film Lab Bali`);
+    const body = encodeURIComponent(`Hi ${r.custName}! Your scans are ready 🎞️\n\nOrder: ${r.orderNumber}\n\nClick the link below to access your personalised delivery page:\n${r.url}\n\nLink active for 7 days. Quote order number when collecting negatives.\n\nQuestions? WhatsApp us at +62 822 5131 8377\n\nKind regards,\nSaujana Film Lab\nBali, Indonesia`);
     window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${custEmail?encodeURIComponent(custEmail):""}&su=${sub}&body=${body}`,"_blank");
   }
 
