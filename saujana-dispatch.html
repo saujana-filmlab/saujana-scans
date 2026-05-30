@@ -41,7 +41,7 @@ const { useState, useEffect, useRef, useCallback } = React;
 
 const API = "https://script.google.com/macros/s/AKfycbyCCkm0VIH6jsuj6T68KktBiHgE3IKnDQEOgEogRExKxmQ4WHXaW9wK4C9gZ2hhlfk/exec";
 const BASE_URL = "https://saujana-filmlab.github.io/saujana-scans";
-const PASSWORD = "saujana2025";
+const PASSWORD = "8888";
 
 async function apiCall(action, data=null) {
   try {
@@ -124,7 +124,7 @@ function LockScreen({onUnlock}) {
 }
 
 // ── Dispatch Tab ──────────────────────────────────────────
-function Dispatch({customers, onOrderSaved}) {
+function Dispatch({customers, onOrderSaved, prefill, clearPrefill}) {
   const [orderNo, setOrderNo]     = useState("");
   const [custInput, setCustInput] = useState("");
   const [selCust, setSelCust]     = useState(null);
@@ -141,14 +141,23 @@ function Dispatch({customers, onOrderSaved}) {
   const [toast, setToast]         = useState("");
   const dropRef = useRef();
 
+  useEffect(() => {
+    if (prefill) {
+      setSelCust(prefill);
+      setCustInput(prefill.name || "");
+      setCustEmail(prefill.email || "");
+      if (clearPrefill) clearPrefill();
+    }
+  }, [prefill, clearPrefill]);
+
   const showToast = msg => { setToast(msg); setTimeout(()=>setToast(""),2500); };
 
-  const matches = custInput.length > 0 && !selCust
+ const matches = custInput.length > 0 && !selCust
     ? customers.filter(c => {
         const q = custInput.toLowerCase();
-        return c.name.toLowerCase().includes(q) ||
-               c.email.toLowerCase().includes(q) ||
-               (c.phone && c.phone.includes(q));
+        return c.name?.toLowerCase().includes(q) ||
+               c.email?.toLowerCase().includes(q) ||
+               c.phone?.toLowerCase().includes(q);
       }).slice(0,8)
     : [];
 
