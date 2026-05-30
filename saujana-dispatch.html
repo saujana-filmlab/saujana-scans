@@ -227,6 +227,16 @@ function Dispatch({customers, onOrderSaved, prefill, clearPrefill}) {
     window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${custEmail?encodeURIComponent(custEmail):""}&su=${sub}&body=${body}`,"_blank");
   }
 
+function copyWhatsApp() {
+    if (!result || !shortUrl) return;
+    const text = `Hi ${result.custName}! Your scans are ready 🎞️\n\nOrder Number: ${result.orderNumber}\n\nGet your scans here:\n${shortUrl}\n\nLink active for 7 days. Quote order number when collecting negatives.\n\nSaujana Film Lab Bali`;
+    navigator.clipboard.writeText(text).then(()=>{
+      setCopied(c=>({...c, wa:true}));
+      showToast("WhatsApp text copied!");
+      setTimeout(()=>setCopied(c=>({...c, wa:false})), 2000);
+    });
+  }
+
   const canGen = orderNo.trim() && rolls.some(Boolean) && driveLink.trim();
 
   return (
@@ -373,10 +383,16 @@ function Dispatch({customers, onOrderSaved, prefill, clearPrefill}) {
                     fontSize:12,color:"var(--blue-l)",cursor:"pointer",marginBottom:8}}>
                     {shortUrl}
                   </div>
-                  <button onClick={()=>copyText(shortUrl,"short")}
-                    style={{...css.btn(),width:"100%",padding:11}}>
-                    {copied.short?"Copied ✓":"Copy Short Link"}
-                  </button>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+                    <button onClick={()=>copyText(shortUrl,"short")}
+                      style={{...css.btn(),width:"100%",padding:11}}>
+                      {copied.short?"Copied ✓":"Copy Link"}
+                    </button>
+                    <button onClick={copyWhatsApp}
+                      style={{...css.btn("ghost"),width:"100%",padding:11}}>
+                      {copied.wa?"Copied ✓":"Copy for WA"}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
