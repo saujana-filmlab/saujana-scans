@@ -105,8 +105,9 @@ function LockScreen({onUnlock}) {
       <div style={{width:"100%",maxWidth:380,background:"var(--card)",
                    border:"1px solid var(--border)",borderTop:"3px solid var(--blue)",
                    borderRadius:3,padding:"40px 36px",textAlign:"center"}}>
-        <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:42,fontStyle:"italic",
-                     color:"var(--white)",marginBottom:4}}>Saujana</div>
+       <div style={{display:"flex",justifyContent:"center",alignItems:"center",marginBottom:30}}>
+          <img src="saujana-dd.png" alt="Darkroom Dispatch Logo" style={{height:110, maxWidth:"100%", objectFit:"contain"}}/>
+        </div>
         <div style={{fontSize:9,letterSpacing:"0.4em",textTransform:"uppercase",
                      color:"var(--muted)",marginBottom:36}}>Film Lab Bali · Operations</div>
         <div style={{fontSize:28,marginBottom:20}}>🔒</div>
@@ -718,10 +719,9 @@ function App() {
         <div style={{maxWidth:1100,margin:"0 auto"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",paddingTop:14}}>
             <div>
-              <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontStyle:"italic",color:"var(--white)"}}>
-                Saujana
-              </div>
-              <div style={{fontSize:8,letterSpacing:"0.4em",textTransform:"uppercase",color:"var(--muted)",marginTop:2}}>
+              <div>
+              <img src="saujana-dd.png" alt="Darkroom Dispatch Logo" style={{height:35, objectFit:"contain", display:"block"}}/>
+              <div style={{fontSize:8,letterSpacing:"0.4em",textTransform:"uppercase",color:"var(--muted)",marginTop:8}}>
                 Film Lab Bali · Operations
               </div>
             </div>
