@@ -72,6 +72,8 @@ const fmtDT   = ts => {
          d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
 };
 
+const deliveryUrl = o => `${BASE_URL}?order=${encodeURIComponent(o.orderNumber)}&name=${encodeURIComponent(o.customerName||"Customer")}&film=${encodeURIComponent(o.film||"")}&link=${encodeURIComponent(o.driveLink||"")}${o.notes?"&notes="+encodeURIComponent(o.notes):""}`;
+
 // ── Styles ────────────────────────────────────────────────
 const css = {
   btn: (variant="primary") => ({
@@ -136,7 +138,7 @@ function LockScreen({onUnlock}) {
 }
 
 // ── Dispatch Tab ──────────────────────────────────────────
-function Dispatch({customers, onOrderSaved, prefill, clearPrefill}) {
+function Dispatch({customers, orders=[], onOrderSaved, prefill, clearPrefill}) {
   const [orderNo, setOrderNo]     = useState("");
   const [custInput, setCustInput] = useState("");
   const [selCust, setSelCust]     = useState(null);
@@ -151,6 +153,7 @@ function Dispatch({customers, onOrderSaved, prefill, clearPrefill}) {
   const [showDrop, setShowDrop]   = useState(false);
   const [copied, setCopied]       = useState({});
   const [toast, setToast]         = useState("");
+  const [orderSearch, setOrderSearch] = useState("");
   const dropRef = useRef();
 
   useEffect(() => {
@@ -190,13 +193,13 @@ function Dispatch({customers, onOrderSaved, prefill, clearPrefill}) {
     if (!orderNo.trim()||!film||!driveLink.trim()) return;
     setGenerating(true);
     const name = selCust ? selCust.name : (custInput.trim()||"Customer");
-    const url = `${BASE_URL}?order=${encodeURIComponent(orderNo)}&name=${encodeURIComponent(name)}&film=${encodeURIComponent(film)}&link=${encodeURIComponent(driveLink)}${notes?"&notes="+encodeURIComponent(notes):""}`;
+    const order = {orderNumber:orderNo.trim().toUpperCase(), customerName:name, film, notes:notes.trim(), driveLink:driveLink.trim()};
+    const url = deliveryUrl(order);
     const saved = await apiCall("addOrder",{
-      orderNumber:orderNo.trim().toUpperCase(), customerId:selCust?.id||"",
-      customerName:name, film, notes:notes.trim(), driveLink:driveLink.trim(),
+      ...order, customerId:selCust?.id||"",
     });
-    onOrderSaved(saved, selCust?.id);
-    setResult({url, custName:name, orderNumber:orderNo.trim().toUpperCase(), film});
+    onOrderSaved({...saved, ...order}, selCust?.id);
+    setResult({url, custName:name, orderNumber:order.orderNumber, film});
     setShortUrl(null); setCopied({}); setGenerating(false);
     showToast("Order saved to Sheets ✓");
   }
@@ -226,7 +229,7 @@ function Dispatch({customers, onOrderSaved, prefill, clearPrefill}) {
   async function copyRich() {
     if (!result) return;
     const r = result;
-    const html = `<p>Hi <strong>${r.custName}</strong>! Your scans are ready 🎞️</p><br><p><strong>Order Number: ${r.orderNumber}</strong></p><br><p><a href="${r.url}"><strong>Get your scans here →</strong></a></p><br><p>Link active for <strong>7 days</strong>. Quote order number when collecting negatives.</p><br><p>Questions? <a href="https://wa.me/6282251318377"><strong>WhatsApp: +62 822 5131 8377</strong></a></p><br><p>Kind regards,<br><strong>Saujana Film Lab</strong><br>Bali, Indonesia</p>`;
+    const html = `<p>Hi <strong>${r.custName}</strong>! Your scans are ready 🎞️</p><br><p><strong>Order Number: ${r.orderNumber}</strong></p><br><p>Please click the link below to access your scans:</p><br><p><a href="${r.url}"><strong>Get your scans here →</strong></a></p><br><p>Link active for <strong>7 days</strong>. Quote order number when collecting negatives.</p><br><p>Questions? <a href="https://wa.me/6282251318377"><strong>WhatsApp: +62 822 5131 8377</strong></a></p><br><p>Kind regards,<br><strong>Saujana Film Lab</strong><br>Bali, Indonesia</p>`;
     await navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([html],{type:"text/html"})})]);
     showToast("Rich email copied — paste into Gmail!");
   }
@@ -235,7 +238,7 @@ function Dispatch({customers, onOrderSaved, prefill, clearPrefill}) {
     if (!result) return;
     const r = result;
     const sub = encodeURIComponent(`[${r.orderNumber}] Your scans are ready - Saujana Film Lab Bali`);
-    const body = encodeURIComponent(`Hi ${r.custName}! Your scans are ready 🎞️\n\nOrder: ${r.orderNumber}\n\nClick the link below to access your personalised delivery page:\n${r.url}\n\nLink active for 7 days. Quote order number when collecting negatives.\n\nQuestions? WhatsApp us at +62 822 5131 8377\n\nKind regards,\nSaujana Film Lab\nBali, Indonesia`);
+    const body = encodeURIComponent(`Hi ${r.custName}! Your scans are ready 🎞️\n\nOrder: ${r.orderNumber}\n\nPlease click the link below to access your scans:\n\n${r.url}\n\nLink active for 7 days. Quote order number when collecting negatives.\n\nQuestions? WhatsApp us at +62 822 5131 8377\n\nKind regards,\nSaujana Film Lab\nBali, Indonesia`);
     window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${custEmail?encodeURIComponent(custEmail):""}&su=${sub}&body=${body}`,"_blank");
   }
 
@@ -250,6 +253,29 @@ function copyWhatsApp() {
   }
 
   const canGen = orderNo.trim() && rolls.some(Boolean) && driveLink.trim();
+  const hasOrderSearch = orderSearch.trim().length > 0;
+  const pastOrders = orders
+    .filter(o=>o.driveLink)
+    .filter(o=>{
+      const q = orderSearch.toLowerCase();
+      return hasOrderSearch && (
+        String(o.orderNumber||"").toLowerCase().includes(q) ||
+        String(o.customerName||"").toLowerCase().includes(q) ||
+        String(o.film||"").toLowerCase().includes(q) ||
+        String(o.notes||"").toLowerCase().includes(q)
+      );
+    })
+    .sort((a,b)=>(b.createdAt||0)-(a.createdAt||0))
+    .slice(0,12);
+
+  function loadPastOrder(o) {
+    const customer = customers.find(c=>c.id===o.customerId);
+    setCustEmail(customer?.email || "");
+    setResult({url:deliveryUrl(o), custName:o.customerName||"Customer", orderNumber:o.orderNumber, film:o.film});
+    setShortUrl(null);
+    setCopied({});
+    showToast("Past order loaded");
+  }
 
   return (
     <div style={{display:"flex",gap:16,height:"calc(100vh - 130px)"}}>
@@ -364,8 +390,9 @@ function copyWhatsApp() {
 
       {/* Result */}
       <div style={{flex:1,minWidth:0,overflowY:"auto"}}>
+        <div style={{display:"flex",flexDirection:"column",gap:12}}>
         {result ? (
-          <div style={{display:"flex",flexDirection:"column",gap:12}}>
+          <>
             <div style={css.card}>
               <span style={css.secLabel}>Delivery Page Link</span>
               <div onClick={()=>copyText(result.url,"url")} style={{background:"var(--dark)",
@@ -415,7 +442,7 @@ function copyWhatsApp() {
                            border:"1px solid var(--border)",borderRadius:2,padding:18,marginBottom:12}}>
                 Hi <strong style={{color:"var(--white)"}}>{result.custName}</strong>! Your scans are ready 🎞️<br/><br/>
                 <strong style={{color:"var(--white)"}}>Order Number: {result.orderNumber}</strong><br/><br/>
-                Click below to access your personalised delivery page:<br/><br/>
+                Please click the link below to access your scans:<br/><br/>
                 <span style={{color:"var(--blue-l)",textDecoration:"underline"}}>Get your scans here →</span><br/><br/>
                 Link active for <strong style={{color:"var(--white)"}}>7 days</strong>. Quote order number when collecting negatives.<br/><br/>
                 Questions? WhatsApp us at <strong style={{color:"var(--white)"}}>+62 822 5131 8377</strong><br/><br/>
@@ -427,9 +454,9 @@ function copyWhatsApp() {
                 <button onClick={openGmail} style={{...css.btn("ghost"),padding:11}}>Open in Gmail ↗</button>
               </div>
             </div>
-          </div>
+          </>
         ) : (
-          <div style={{...css.card,height:"100%",display:"flex",alignItems:"center",
+          <div style={{...css.card,minHeight:220,display:"flex",alignItems:"center",
                        justifyContent:"center",flexDirection:"column",gap:10}}>
             <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:32,fontStyle:"italic",color:"var(--dim)"}}>
               Ready to dispatch
@@ -439,6 +466,50 @@ function copyWhatsApp() {
             </div>
           </div>
         )}
+
+          <div style={css.card}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,marginBottom:14}}>
+              <span style={{...css.secLabel,marginBottom:0}}>Retrieve Past Order</span>
+              <span style={{fontSize:10,color:"var(--dim)"}}>{pastOrders.length} shown</span>
+            </div>
+            <input value={orderSearch} onChange={e=>setOrderSearch(e.target.value)}
+              placeholder="Search order, customer, film, notes..." style={{marginBottom:12}}/>
+            <div style={{display:"flex",flexDirection:"column",gap:8,maxHeight:300,overflowY:"auto"}}>
+              {!hasOrderSearch ? (
+                <div style={{textAlign:"center",padding:24,color:"var(--dim)",fontSize:12}}>
+                  Search to retrieve a saved order
+                </div>
+              ) : pastOrders.length===0 ? (
+                <div style={{textAlign:"center",padding:24,color:"var(--dim)",fontSize:12}}>
+                  No matching saved orders found
+                </div>
+              ) : pastOrders.map(o=>(
+                <div key={o.id} style={{display:"flex",alignItems:"center",gap:12,padding:"11px 12px",
+                  background:"var(--dark)",border:"1px solid var(--border)",borderRadius:2}}>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+                      <span style={{fontFamily:"'Cormorant Garamond',serif",fontSize:14,
+                        color:"var(--white)",letterSpacing:"0.05em"}}>{o.orderNumber}</span>
+                      <span style={{fontSize:11,color:"var(--muted)"}}>{o.customerName}</span>
+                    </div>
+                    <div style={{fontSize:10,color:"var(--dim)",marginTop:3}}>
+                      {fmtDT(o.createdAt)} · {o.film}
+                    </div>
+                  </div>
+                  <button onClick={()=>loadPastOrder(o)}
+                    style={{...css.btn(),padding:"7px 10px",fontSize:9,whiteSpace:"nowrap"}}>
+                    Load
+                  </button>
+                  <a href={deliveryUrl(o)} target="_blank" rel="noopener"
+                    style={{...css.btn("ghost"),padding:"7px 10px",fontSize:9,whiteSpace:"nowrap",
+                      color:"var(--blue-l)",textDecoration:"none"}}>
+                    Open ↗
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -453,6 +524,8 @@ function Registry({customers, orders, onAdd, onUpdate, onDelete, onNewOrderFor})
   const [form, setForm]           = useState({name:"",email:"",phone:""});
   const [saving, setSaving]       = useState(false);
   const [toast, setToast]         = useState("");
+  const [page, setPage]           = useState(1);
+  const pageSize = 20;
 
   const showToast = msg => { setToast(msg); setTimeout(()=>setToast(""),2500); };
 
@@ -466,6 +539,9 @@ function Registry({customers, orders, onAdd, onUpdate, onDelete, onNewOrderFor})
       sortBy==="recent"?(b.lastOrderDate||0)-(a.lastOrderDate||0):
       a.name.localeCompare(b.name)
     );
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const pagedCustomers = filtered.slice((currentPage-1)*pageSize, currentPage*pageSize);
 
   const custOrders = selected
     ? orders.filter(o=>o.customerId===selected.id).sort((a,b)=>b.createdAt-a.createdAt)
@@ -486,9 +562,13 @@ function Registry({customers, orders, onAdd, onUpdate, onDelete, onNewOrderFor})
 
   async function del(id) {
     if (!confirm("Remove this customer?")) return;
-    await onDelete(id);
-    if (selected?.id===id) setSelected(null);
-    showToast("Removed");
+    try {
+      await onDelete(id);
+      if (selected?.id===id) setSelected(null);
+      showToast("Removed ✓");
+    } catch(e) {
+      showToast("Could not remove from Sheets");
+    }
   }
 
   return (
@@ -499,7 +579,7 @@ function Registry({customers, orders, onAdd, onUpdate, onDelete, onNewOrderFor})
       <div style={{width:380,flexShrink:0,display:"flex",flexDirection:"column",gap:10,overflowY:"auto"}}>
         {/* Search + Add */}
         <div style={{display:"flex",gap:8}}>
-          <input value={search} onChange={e=>setSearch(e.target.value)}
+          <input value={search} onChange={e=>{setSearch(e.target.value); setPage(1);}}
             placeholder="Search name, email or phone…" style={{flex:1,fontSize:12}}/>
           <button onClick={()=>{setEditing("new");setForm({name:"",email:"",phone:""}); }}
             style={{...css.btn("blue"),padding:"11px 14px",whiteSpace:"nowrap"}}>+ Add</button>
@@ -508,7 +588,7 @@ function Registry({customers, orders, onAdd, onUpdate, onDelete, onNewOrderFor})
         {/* Sort */}
         <div style={{display:"flex",gap:6}}>
           {[{id:"name",l:"A–Z"},{id:"orders",l:"Most Orders"},{id:"recent",l:"Recent"}].map(s=>(
-            <button key={s.id} onClick={()=>setSortBy(s.id)} style={{
+            <button key={s.id} onClick={()=>{setSortBy(s.id); setPage(1);}} style={{
               flex:1,padding:7,background:"none",fontFamily:"'Montserrat',sans-serif",
               border:`1px solid ${sortBy===s.id?"var(--blue-l)":"var(--border)"}`,borderRadius:2,
               color:sortBy===s.id?"var(--blue-l)":"var(--muted)",
@@ -545,6 +625,7 @@ function Registry({customers, orders, onAdd, onUpdate, onDelete, onNewOrderFor})
         {/* Count */}
         <div style={{fontSize:9,color:"var(--dim)",letterSpacing:"0.25em",textTransform:"uppercase"}}>
           {filtered.length} customer{filtered.length!==1?"s":""}{search?` · "${search}"`:""}
+          {filtered.length>pageSize?` · page ${currentPage}/${totalPages}`:""}
         </div>
 
         {/* List */}
@@ -558,7 +639,7 @@ function Registry({customers, orders, onAdd, onUpdate, onDelete, onNewOrderFor})
                 {search?"Try a different search":"Add your first customer"}
               </div>
             </div>
-          ) : filtered.map(c=>(
+          ) : pagedCustomers.map(c=>(
             <div key={c.id} onClick={()=>setSelected(c)}
               style={{background:selected?.id===c.id?"var(--blue-gl)":"var(--card)",
                 border:`1px solid ${selected?.id===c.id?"var(--blue)":"var(--border)"}`,
@@ -589,6 +670,22 @@ function Registry({customers, orders, onAdd, onUpdate, onDelete, onNewOrderFor})
             </div>
           ))}
         </div>
+
+        {filtered.length>pageSize&&(
+          <div style={{display:"grid",gridTemplateColumns:"1fr auto 1fr",gap:8,alignItems:"center"}}>
+            <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={currentPage===1}
+              style={{...css.btn("ghost"),padding:9,fontSize:9,opacity:currentPage===1?0.35:1}}>
+              Previous
+            </button>
+            <div style={{fontSize:10,color:"var(--dim)",minWidth:78,textAlign:"center"}}>
+              {((currentPage-1)*pageSize)+1}-{Math.min(currentPage*pageSize,filtered.length)}
+            </div>
+            <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={currentPage===totalPages}
+              style={{...css.btn("ghost"),padding:9,fontSize:9,opacity:currentPage===totalPages?0.35:1}}>
+              Next
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Right: Detail */}
@@ -647,6 +744,11 @@ function Registry({customers, orders, onAdd, onUpdate, onDelete, onNewOrderFor})
                     <div style={{fontSize:10,color:"var(--dim)",marginTop:3}}>{fmtDT(o.createdAt)}</div>
                   </div>
                   {o.notes&&<div style={{fontSize:10,color:"var(--muted)",maxWidth:160,textAlign:"right"}}>{o.notes}</div>}
+                  {o.driveLink&&<a href={deliveryUrl(o)} target="_blank" rel="noopener"
+                    style={{...css.btn("ghost"),padding:"6px 10px",fontSize:9,whiteSpace:"nowrap",
+                      color:"var(--blue-l)",textDecoration:"none"}}>
+                    Open scans ↗
+                  </a>}
                 </div>
               ))}
             </div>
@@ -703,9 +805,14 @@ function App() {
 
   async function handleDelete(id) {
     setSyncing(true);
-    await apiCall("deleteCustomer",id);
-    setCustomers(p=>p.filter(c=>c.id!==id));
-    setSyncing(false);
+    try {
+      const result = await apiCall("deleteCustomer",{id, customerId:id});
+      if (result?.error) throw new Error(result.error);
+      setCustomers(p=>p.filter(c=>c.id!==id));
+      await load();
+    } finally {
+      setSyncing(false);
+    }
   }
 
   function handleOrderSaved(saved, custId) {
@@ -765,7 +872,7 @@ function App() {
             Connecting to Google Sheets…
           </div>
         ) : tab==="dispatch" ? (
-          <Dispatch customers={customers} onOrderSaved={handleOrderSaved}
+          <Dispatch customers={customers} orders={orders} onOrderSaved={handleOrderSaved}
             prefill={prefill} clearPrefill={()=>setPrefill(null)}/>
         ) : (
           <Registry customers={customers} orders={orders}
