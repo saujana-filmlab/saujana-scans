@@ -456,10 +456,10 @@
 
     <!-- ready card -->
     <div class="ready-card">
-      <p class="ready-eyebrow">Order complete Â· <span id="order-display"></span></p>
+      <p class="ready-eyebrow">Order complete · <span id="order-display"></span></p>
       <h1 class="ready-headline">Your scans are ready,</h1>
       <p class="ready-name"><!-- CUSTOMER NAME -->Name<!-- /CUSTOMER NAME --></p>
-      <p class="ready-sub"><!-- FILM INFO -->Portra 400 Â· 35mm Â· 36 exp<!-- /FILM INFO --></p>
+      <p class="ready-sub"><!-- FILM INFO -->Portra 400 · 35mm · 36 exp<!-- /FILM INFO --></p>
 
       <div class="download-wrap">
         <a href="DRIVE_LINK_HERE" class="btn-download" target="_blank" rel="noopener">
@@ -475,7 +475,7 @@
 
     <!-- notice -->
     <div class="notice">
-      <span class="notice-icon">â³</span>
+      <span class="notice-icon">⏳</span>
       <p>
         <strong>Your download link is active for 7 days.</strong> Please save your scans before then.
         Need us to hold onto your negatives? We store them for up to <strong>1 month upon request</strong> - just let us know.
@@ -505,14 +505,14 @@
           </div>
         </a>
         <a href="https://www.instagram.com/saujanabali" target="_blank" rel="noopener" class="action-card">
-          <div class="action-icon">ðŸ“·</div>
+          <div class="action-icon">📸</div>
           <div class="action-text">
             <p class="action-title">Tag Us</p>
             <p class="action-sub">@saujanabali</p>
           </div>
         </a>
         <a href="https://wa.me/6282251318377" target="_blank" rel="noopener" class="action-card">
-          <div class="action-icon">ðŸ’¬</div>
+          <div class="action-icon">💬</div>
           <div class="action-text">
             <p class="action-title">WhatsApp Us</p>
             <p class="action-sub">Questions about your order</p>
@@ -573,7 +573,7 @@
       const notes = params.get('notes');
       if (notes) {
         const notesEl = document.getElementById('order-notes-display');
-        notesEl.innerHTML = `<span style="display:block; padding:12px 16px; margin-bottom:16px; background:#161616; border-left:2px solid #444; border-radius:1px; font-style:normal; font-size:14px; color:var(--off-white); line-height:1.7;">ðŸ“‹ <strong>Order Note:</strong> ${notes}</span>`;
+        notesEl.innerHTML = `<span style="display:block; padding:12px 16px; margin-bottom:16px; background:#161616; border-left:2px solid #444; border-radius:1px; font-style:normal; font-size:14px; color:var(--off-white); line-height:1.7;">📋 <strong>Order Note:</strong> ${notes}</span>`;
       }
       if (name) {
         document.querySelector('.ready-name').textContent = name;
