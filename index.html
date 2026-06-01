@@ -11,6 +11,7 @@
   <meta property="og:url" content="https://bali-scans.saujanalab.com/" />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
+  <!-- Added ?v=2 to force the browser to clear its cache and load the icon -->
   <link rel="icon" type="image/png" href="saujana-favicon.png?v=2" />
   <link rel="apple-touch-icon" href="saujana-favicon.png?v=2" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -422,6 +423,7 @@
 </head>
 <body>
 
+  <!-- top film strip -->
   <div class="sprocket-strip">
     <div class="sprocket-hole"></div>
     <div class="sprocket-hole"></div>
@@ -441,21 +443,25 @@
 
   <div class="page">
 
+    <!-- header -->
     <div class="header">
       <div class="logo-wrap">
+        <!-- Added ?v=2 to force the browser to load the image immediately -->
         <img src="saujana-logo.png?v=2" alt="Saujana Film Lab Bali"
           onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+        <!-- fallback text logo -->
         <div style="display:none; font-family:'Cormorant Garamond',serif; font-size:36px; font-style:italic; font-weight:300; color:var(--white); letter-spacing:-0.02em;">
           Saujana <span style="font-style:normal; font-size:14px; letter-spacing:0.3em; font-weight:400; vertical-align:middle; color:var(--muted);">FILM LAB BALI</span>
         </div>
       </div>
     </div>
 
+    <!-- ready card -->
     <div class="ready-card">
       <p class="ready-eyebrow">Order complete · <span id="order-display"></span></p>
       <h1 class="ready-headline">Your scans are ready,</h1>
-      <p class="ready-name">Name</p>
-      <p class="ready-sub">Portra 400 · 35mm · 36 exp</p>
+      <p class="ready-name"><!-- CUSTOMER NAME -->Name<!-- /CUSTOMER NAME --></p>
+      <p class="ready-sub"><!-- FILM INFO -->Portra 400 · 35mm · 36 exp<!-- /FILM INFO --></p>
 
       <div class="download-wrap">
         <a href="DRIVE_LINK_HERE" class="btn-download" target="_blank" rel="noopener">
@@ -469,6 +475,7 @@
       </div>
     </div>
 
+    <!-- notice -->
     <div class="notice">
       <span class="notice-icon">⏳</span>
       <p>
@@ -477,6 +484,7 @@
       </p>
     </div>
 
+    <!-- personal note -->
     <div class="info-section">
       <p class="info-label">A note from us</p>
       <div class="message-block">
@@ -487,6 +495,7 @@
       </div>
     </div>
 
+    <!-- actions -->
     <div class="actions">
       <p class="info-label">Stay in touch</p>
       <div class="action-grid">
@@ -497,11 +506,11 @@
             <p class="action-sub">@saujanabali</p>
           </div>
         </a>
-        <a href="https://www.instagram.com/saujanabali" target="_blank" rel="noopener" class="action-card">
-          <div class="action-icon">📸</div>
+        <a href="https://g.page/r/CarOb39L8uCJEAE/review" target="_blank" rel="noopener" class="action-card">
+          <div class="action-icon">⭐</div>
           <div class="action-text">
-            <p class="action-title">Tag Us</p>
-            <p class="action-sub">@saujanabali</p>
+            <p class="action-title">Review Us</p>
+            <p class="action-sub">On Google</p>
           </div>
         </a>
         <a href="https://wa.me/6282251318377" target="_blank" rel="noopener" class="action-card">
@@ -511,6 +520,7 @@
             <p class="action-sub">Questions about your order</p>
           </div>
         </a>
+        <!-- Corrected Location Button -->
         <a href="https://maps.app.goo.gl/KorPvWgELXShKvGW7" target="_blank" rel="noopener" class="action-card">
           <div class="action-icon">📍</div>
           <div class="action-text">
@@ -521,6 +531,7 @@
       </div>
     </div>
 
+    <!-- footer -->
     <div class="footer">
       <p class="footer-text">
         Saujana Film Lab · Bali, Indonesia<br>
@@ -531,6 +542,7 @@
       </p>
     </div>
 
+    <!-- bottom film strip -->
     <div class="sprocket-strip sprocket-strip-bottom">
       <div class="sprocket-hole"></div>
       <div class="sprocket-hole"></div>
