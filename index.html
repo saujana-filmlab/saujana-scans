@@ -590,7 +590,7 @@
     return;
   }
 
-  fetch(`https://script.google.com/macros/s/AKfycbw69oYQuYsMp7RVtPo8U0Ls94eXHbqYp3hb5dbb-w/dev?action=getOrder&order=${encodeURIComponent(orderNo)}`)
+  fetch(`https://script.google.com/macros/s/AKfycbw69oYQuYsMp7RVtPo8U0Ls94eXHbqYp3hb5dbb-w/exec?action=getOrder&order=${encodeURIComponent(orderNo)}`)
     .then(res => res.json())
     .then(data => {
 
