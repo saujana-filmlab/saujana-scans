@@ -563,10 +563,21 @@
       const link  = params.get('link');
       const notesFromUrl = params.get('notes');
 
-      // 1. Fill data from URL if it exists
+ // 1. Fill data from URL if it exists, otherwise show analog loading text
       if (order) document.getElementById('order-display').textContent = order;
-      if (name)  document.querySelector('.ready-name').textContent = name;
-      if (film)  document.querySelector('.ready-sub').textContent = film;
+      
+      if (name) {
+        document.querySelector('.ready-name').textContent = name;
+      } else if (order) {
+        document.querySelector('.ready-name').textContent = "Film Developed!";
+      }
+
+      if (film) {
+        document.querySelector('.ready-sub').textContent = film;
+      } else if (order) {
+        document.querySelector('.ready-sub').textContent = "Packing up your scans..";
+      }
+
       if (link)  document.querySelector('.btn-download').href = decodeURIComponent(link);
 
       function showNotes(notes) {
