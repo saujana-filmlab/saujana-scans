@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your scans from Saujana Film Lab Bali</title>
+  <meta name="description" content="Your film scans are ready from Saujana Film Lab Bali." />
+  <meta property="og:title" content="Your scans from Saujana Film Lab Bali" />
+  <meta property="og:description" content="Open your personalised scan delivery page from Saujana Film Lab Bali." />
+  <meta property="og:image" content="https://bali-scans.saujanalab.com/saujana-favicon.png" />
+  <meta property="og:url" content="https://bali-scans.saujanalab.com/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <!-- Added ?v=2 to force the browser to clear its cache and load the icon -->
+  <link rel="icon" type="image/png" href="saujana-favicon.png?v=2" />
+  <link rel="apple-touch-icon" href="saujana-favicon.png?v=2" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #0a0a0a;
+      --off-black: #111111;
+      --dark: #1a1a1a;
+      --mid: #2e2e2e;
+      --dim: #555;
+      --muted: #888;
+      --light: #c8c8c8;
+      --off-white: #eeece8;
+      --white: #fafaf8;
+      --grain-opacity: 0.045;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--black);
+      color: var(--off-white);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      overflow-x: hidden;
+      cursor: default;
+    }
+
+    /* grain overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      opacity: var(--grain-opacity);
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* sprocket strip top */
+    .sprocket-strip {
+      width: 100%;
+      height: 36px;
+      background: var(--off-black);
+      border-bottom: 1px solid #222;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .sprocket-strip::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #333 20%, #333 80%, transparent);
+    }
+    .sprocket-hole {
+      width: 18px;
+      height: 22px;
+      border: 1.5px solid #333;
+      border-radius: 3px;
+      margin-right: 28px;
+      flex-shrink: 0;
+      opacity: 0.6;
+    }
+    .frame-counter {
+      position: absolute;
+      right: 24px;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      color: var(--dim);
+      font-family: 'Montserrat', monospace;
+    }
+
+    /* main layout */
+    .page {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 32px 80px;
+    }
+
+    /* header */
+    .header {
+      padding: 64px 0 48px;
+      text-align: center;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.1s forwards;
+    }
+
+    .logo-wrap {
+      display: inline-block;
+      margin-bottom: 32px;
+    }
+
+    .logo-wrap img {
+      width: 220px;
+      opacity: 0.95;
+
+    }
+
+    .tagline {
+      font-size: 10px;
+      letter-spacing: 0.35em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 40px 0;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.3s forwards;
+    }
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #2e2e2e);
+    }
+    .divider-line:last-child {
+      background: linear-gradient(90deg, #2e2e2e, transparent);
+    }
+    .divider-icon {
+      font-size: 16px;
+      color: var(--dim);
+      letter-spacing: 0.1em;
+    }
+
+    /* ready card */
+    .ready-card {
+      text-align: center;
+      padding: 52px 40px;
+      background: var(--off-black);
+      border: 1px solid #222;
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.4s forwards;
+    }
+    .ready-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #444, transparent);
+    }
+
+    .ready-eyebrow {
+      font-size: 9px;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .ready-headline {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(32px, 6vw, 48px);
+      font-weight: 300;
+      font-style: italic;
+      color: var(--white);
+      line-height: 1.15;
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+
+    .ready-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(32px, 6vw, 48px);
+      font-weight: 400;
+      color: var(--white);
+      line-height: 1.15;
+    }
+
+    .ready-sub {
+      margin-top: 20px;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+    }
+
+    /* download button */
+    .download-wrap {
+      margin-top: 36px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 40px;
+      background: var(--off-white);
+      color: var(--black);
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      border-radius: 1px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-download::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--white);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+    .btn-download:hover::before { transform: scaleX(1); }
+    .btn-download span, .btn-download svg { position: relative; z-index: 1; }
+    .btn-download:hover { letter-spacing: 0.3em; }
+
+    /* notice */
+    .notice {
+      margin-top: 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: #161616;
+      border: 1px solid #222;
+      border-left: 2px solid #444;
+      padding: 16px 20px;
+      border-radius: 1px;
+      text-align: left;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.55s forwards;
+    }
+    .notice-icon { font-size: 14px; margin-top: 1px; flex-shrink: 0; }
+    .notice p {
+      font-size: 11.5px;
+      line-height: 1.7;
+      color: var(--light);
+    }
+    .notice p strong {
+      color: var(--off-white);
+      font-weight: 500;
+    }
+
+    /* info section */
+    .info-section {
+      margin-top: 48px;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.65s forwards;
+    }
+
+    .info-label {
+      font-size: 9px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .info-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #222;
+    }
+
+    .message-block {
+      background: var(--off-black);
+      border: 1px solid #1e1e1e;
+      padding: 32px 36px;
+      border-radius: 1px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      font-weight: 300;
+      line-height: 1.8;
+      color: var(--light);
+      font-style: italic;
+    }
+    .message-block strong {
+      font-style: normal;
+      font-weight: 400;
+      color: var(--off-white);
+    }
+
+    /* actions */
+    .actions {
+      margin-top: 48px;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.75s forwards;
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .action-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 20px 22px;
+      background: var(--off-black);
+      border: 1px solid #1e1e1e;
+      border-radius: 1px;
+      text-decoration: none;
+      color: var(--light);
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .action-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: #1a1a1a;
+      transform: scaleY(0);
+      transform-origin: bottom;
+      transition: transform 0.25s ease;
+    }
+    .action-card:hover::before { transform: scaleY(1); }
+    .action-card:hover { border-color: #333; color: var(--off-white); }
+    .action-card > * { position: relative; z-index: 1; }
+
+    .action-icon {
+      width: 36px;
+      height: 36px;
+      background: #222;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+      transition: background 0.25s ease;
+    }
+    .action-card:hover .action-icon { background: #2e2e2e; }
+
+    .action-text { }
+    .action-title {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--off-white);
+      margin-bottom: 3px;
+    }
+    .action-sub {
+      font-size: 10.5px;
+      color: var(--muted);
+      letter-spacing: 0.03em;
+    }
+
+    /* footer */
+    .footer {
+      margin-top: 72px;
+      text-align: center;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.85s forwards;
+    }
+
+    .footer-logo {
+      width: 80px;
+      opacity: 0.2;
+      margin-bottom: 16px;
+    }
+
+    .footer-text {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: var(--dim);
+      line-height: 2;
+      text-transform: uppercase;
+    }
+
+    /* sprocket strip bottom */
+    .sprocket-strip-bottom {
+      margin-top: 56px;
+    }
+
+    /* animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* mobile */
+    @media (max-width: 520px) {
+      .page { padding: 0 20px 64px; }
+      .ready-card { padding: 40px 24px; }
+      .message-block { padding: 24px; font-size: 16px; }
+      .action-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- top film strip -->
+  <div class="sprocket-strip">
+    <div class="sprocket-hole"></div>
+    <div class="sprocket-hole"></div>
+    <div class="sprocket-hole"></div>
+    <div class="sprocket-hole"></div>
+    <div class="sprocket-hole"></div>
+    <div class="sprocket-hole"></div>
+    <div class="sprocket-hole"></div>
+    <div class="sprocket-hole"></div>
+    <div class="sprocket-hole"></div>
+    <div class="sprocket-hole"></div>
+    <div class="sprocket-hole"></div>
+    <div class="sprocket-hole"></div>
+    <div class="sprocket-hole"></div>
+    <span class="frame-counter">SAUJANA · BALI</span>
+  </div>
+
+  <div class="page">
+
+    <!-- header -->
+    <div class="header">
+      <div class="logo-wrap">
+        <!-- Added ?v=2 to force the browser to load the image immediately -->
+        <img src="saujana-logo.png?v=2" alt="Saujana Film Lab Bali"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+        <!-- fallback text logo -->
+        <div style="display:none; font-family:'Cormorant Garamond',serif; font-size:36px; font-style:italic; font-weight:300; color:var(--white); letter-spacing:-0.02em;">
+          Saujana <span style="font-style:normal; font-size:14px; letter-spacing:0.3em; font-weight:400; vertical-align:middle; color:var(--muted);">FILM LAB BALI</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ready card -->
+    <div class="ready-card">
+      <p class="ready-eyebrow">Order complete · <span id="order-display"></span></p>
+      <h1 class="ready-headline">Your scans are ready,</h1>
+      <p class="ready-name"><!-- CUSTOMER NAME -->Name<!-- /CUSTOMER NAME --></p>
+      <p class="ready-sub"><!-- FILM INFO -->Portra 400 · 35mm · 36 exp<!-- /FILM INFO --></p>
+
+      <div class="download-wrap">
+        <a href="DRIVE_LINK_HERE" class="btn-download" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          <span>Download Scans</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- notice -->
+    <div class="notice">
+      <span class="notice-icon">⏳</span>
+      <p>
+        <strong>Your download link is active for 7 days.</strong> Please save your scans before then.
+        Need us to hold onto your negatives? We store them for up to <strong>1 month upon request</strong>, just let us know.
+      </p>
+    </div>
+
+    <!-- personal note -->
+    <div class="info-section">
+      <p class="info-label">A note from us</p>
+      <div class="message-block">
+        <span id="order-notes-display"></span>
+        Film has this funny way of making ordinary moments feel eternal. We take that seriously around here, even if we don't always look like it. <strong>Hope your scans are everything you were waiting for.</strong>
+        <br><br>
+        Any questions about your order? We're always here.
+      </div>
+    </div>
+
+    <!-- actions -->
+    <div class="actions">
+      <p class="info-label">Stay in touch</p>
+      <div class="action-grid">
+        <a href="https://www.instagram.com/saujanabali" target="_blank" rel="noopener" class="action-card">
+          <div class="action-icon">★</div>
+          <div class="action-text">
+            <p class="action-title">Follow Bali</p>
+            <p class="action-sub">@saujanabali</p>
+          </div>
+        </a>
+        <a href="https://g.page/r/CarOb39L8uCJEAE/review" target="_blank" rel="noopener" class="action-card">
+          <div class="action-icon">⭐</div>
+          <div class="action-text">
+            <p class="action-title">Support Us</p>
+            <p class="action-sub">With a Google review</p>
+          </div>
+        </a>
+        <a href="https://wa.me/6282251318377" target="_blank" rel="noopener" class="action-card">
+          <div class="action-icon">💬</div>
+          <div class="action-text">
+            <p class="action-title">WhatsApp Us</p>
+            <p class="action-sub">Questions about your order</p>
+          </div>
+        </a>
+        <!-- Corrected Location Button -->
+        <a href="https://maps.app.goo.gl/KorPvWgELXShKvGW7" target="_blank" rel="noopener" class="action-card">
+          <div class="action-icon">📍</div>
+          <div class="action-text">
+            <p class="action-title">Location</p>
+            <p class="action-sub">Open in Maps</p>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- footer -->
+    <div class="footer">
+      <p class="footer-text">
+        Saujana Film Lab · Bali, Indonesia<br>
+        Develop · Scan · Film Supply · Cameras<br><br>
+        <a href="https://www.instagram.com/saujanabali" target="_blank" rel="noopener" style="color:var(--dim); text-decoration:none; letter-spacing:0.15em; font-size:9px;">
+          Bali, Indonesia
+        </a>
+      </p>
+    </div>
+
+    <!-- bottom film strip -->
+    <div class="sprocket-strip sprocket-strip-bottom">
+      <div class="sprocket-hole"></div>
+      <div class="sprocket-hole"></div>
+      <div class="sprocket-hole"></div>
+      <div class="sprocket-hole"></div>
+      <div class="sprocket-hole"></div>
+      <div class="sprocket-hole"></div>
+      <div class="sprocket-hole"></div>
+      <div class="sprocket-hole"></div>
+      <div class="sprocket-hole"></div>
+      <div class="sprocket-hole"></div>
+      <div class="sprocket-hole"></div>
+      <div class="sprocket-hole"></div>
+      <div class="sprocket-hole"></div>
+    </div>
+
+  </div>
+
+
+  <script>
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      const order = params.get('order');
+      const name = params.get('name');
+      const film = params.get('film');
+      const link = params.get('link');
+
+      if (order) {
+        document.getElementById('order-display').textContent = order;
+      }
+      const notes = params.get('notes');
+      if (notes) {
+        const notesEl = document.getElementById('order-notes-display');
+        notesEl.innerHTML = `<span style="display:block; padding:12px 16px; margin-bottom:16px; background:#161616; border-left:2px solid #444; border-radius:1px; font-style:normal; font-size:14px; color:var(--off-white); line-height:1.7;">📋 <strong>Order Note:</strong> ${notes}</span>`;
+      }
+      if (name) {
+        document.querySelector('.ready-name').textContent = name;
+      }
+      if (film) {
+        document.querySelector('.ready-sub').textContent = film;
+      }
+      if (link) {
+        document.querySelector('.btn-download').href = decodeURIComponent(link);
+      }
+    })();
+  </script>
+<script>
+  (function() {
+    const params = new URLSearchParams(window.location.search);
+    const path = window.location.pathname.split('/').pop();
+    const isOrderPath = path && /^\d+$/.test(path);
+    if (isOrderPath) {
+      window.history.replaceState({}, '', `?order=${path}`);
+    }
+  })();
+</script>
+
+</body>
+</html>

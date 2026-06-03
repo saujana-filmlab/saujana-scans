@@ -589,6 +589,16 @@
       }
     })();
   </script>
+<script>
+  (function() {
+    const params = new URLSearchParams(window.location.search);
+    const path = window.location.pathname.split('/').pop();
+    const isOrderPath = path && /^\d+$/.test(path);
+    if (isOrderPath) {
+      window.history.replaceState({}, '', `?order=${path}`);
+    }
+  })();
+</script>
 
 </body>
 </html>
