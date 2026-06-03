@@ -550,16 +550,18 @@
   </div>
 
 
-  <script>
+ <script>
     const SHEETS_API = "https://script.google.com/macros/s/AKfycbyCCkm0VIH6jsuj6T68KktBiHgE3IKnDQEOgEogRExKxmQ4WHXaW9wK4C9gZ2hhlfk/exec";
 
     (function() {
-      const params = new URLSearchParams(window.location.search);
+      // This grabs the query from either a standard URL (?) or a Hash URL (#/?)
+      const queryString = window.location.search || (window.location.hash.includes('?') ? window.location.hash.split('?')[1] : "");
+      const params = new URLSearchParams(queryString);
+      
       const order = params.get('order');
       const name  = params.get('name');
       const film  = params.get('film');
       const link  = params.get('link');
-      // notes from URL still supported as fallback for old links
       const notesFromUrl = params.get('notes');
 
       if (order) document.getElementById('order-display').textContent = order;
@@ -567,17 +569,14 @@
       if (film)  document.querySelector('.ready-sub').textContent = film;
       if (link)  document.querySelector('.btn-download').href = decodeURIComponent(link);
 
-      // Show notes from URL param first (legacy support), then try fetching from Sheets
       function showNotes(notes) {
         if (!notes) return;
         const notesEl = document.getElementById('order-notes-display');
         notesEl.innerHTML = `<span style="display:block; padding:12px 16px; margin-bottom:16px; background:#161616; border-left:2px solid #444; border-radius:1px; font-style:normal; font-size:14px; color:var(--off-white); line-height:1.7;">📋 <strong>Order Note:</strong> ${notes}</span>`;
       }
 
-      // Apply URL notes immediately if present (old links still work)
       if (notesFromUrl) showNotes(notesFromUrl);
 
-      // Fetch notes from Sheets if we have an order number
       if (order) {
         fetch(`${SHEETS_API}?action=getOrder&order=${encodeURIComponent(order)}`)
           .then(r => r.json())
@@ -585,12 +584,11 @@
             if (data && data.notes && !notesFromUrl) {
               showNotes(data.notes);
             }
-            // Also fill in drive link from Sheets if not in URL (extra safety)
             if (data && data.driveLink && !link) {
               document.querySelector('.btn-download').href = data.driveLink;
             }
           })
-          .catch(() => {}); // fail silently — page works fine without notes
+          .catch(() => {}); 
       }
     })();
   </script>
