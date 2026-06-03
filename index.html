@@ -554,7 +554,6 @@
     const SHEETS_API = "https://script.google.com/macros/s/AKfycbyCCkm0VIH6jsuj6T68KktBiHgE3IKnDQEOgEogRExKxmQ4WHXaW9wK4C9gZ2hhlfk/exec";
 
     (function() {
-      // This grabs the query from either a standard URL (?) or a Hash URL (#/?)
       const queryString = window.location.search || (window.location.hash.includes('?') ? window.location.hash.split('?')[1] : "");
       const params = new URLSearchParams(queryString);
       
@@ -564,6 +563,7 @@
       const link  = params.get('link');
       const notesFromUrl = params.get('notes');
 
+      // 1. Fill data from URL if it exists
       if (order) document.getElementById('order-display').textContent = order;
       if (name)  document.querySelector('.ready-name').textContent = name;
       if (film)  document.querySelector('.ready-sub').textContent = film;
@@ -577,18 +577,31 @@
 
       if (notesFromUrl) showNotes(notesFromUrl);
 
+      // 2. Fetch from Google Sheets to fill in ANY missing data
       if (order) {
         fetch(`${SHEETS_API}?action=getOrder&order=${encodeURIComponent(order)}`)
           .then(r => r.json())
           .then(data => {
-            if (data && data.notes && !notesFromUrl) {
-              showNotes(data.notes);
+            if (!data || data.error) return; // Stop if order not found
+            
+            // Fill Name if missing from URL
+            if (!name && data.customerName) {
+              document.querySelector('.ready-name').textContent = data.customerName;
             }
-            if (data && data.driveLink && !link) {
+            // Fill Film if missing from URL
+            if (!film && data.film) {
+              document.querySelector('.ready-sub').textContent = data.film;
+            }
+            // Fill Link if missing from URL
+            if (!link && data.driveLink) {
               document.querySelector('.btn-download').href = data.driveLink;
             }
+            // Fill Notes if missing from URL
+            if (!notesFromUrl && data.notes) {
+              showNotes(data.notes);
+            }
           })
-          .catch(() => {}); 
+          .catch(err => console.error("Error fetching order data:", err)); 
       }
     })();
   </script>
