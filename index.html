@@ -409,6 +409,11 @@
     .loading-pulse {
       animation: pulseText 1.5s infinite ease-in-out;
     }
+/* frozen download button state */
+    .btn-download.disabled {
+      pointer-events: none;
+      opacity: 0.25;
+    }
 
     /* mobile */
     @media (max-width: 520px) {
@@ -573,6 +578,7 @@
 
       const nameEl = document.querySelector('.ready-name');
       const filmEl = document.querySelector('.ready-sub');
+      const btnEl  = document.querySelector('.btn-download');
 
       // 1. Fill data from URL if it exists, otherwise show animated loading text
       if (order) document.getElementById('order-display').textContent = order;
@@ -580,18 +586,25 @@
       if (name) {
         nameEl.textContent = name;
       } else if (order) {
-        nameEl.textContent = "Packing up your scans..";
+        nameEl.textContent = "Film Developed!";
         nameEl.classList.add('loading-pulse');
       }
 
       if (film) {
         filmEl.textContent = film;
       } else if (order) {
-        filmEl.textContent = "Checking your film..";
+        filmEl.textContent = "Packing up your scans..";
         filmEl.classList.add('loading-pulse');
       }
 
-      if (link)  document.querySelector('.btn-download').href = decodeURIComponent(link);
+      // Freeze button if no link is present in URL
+      if (link) {
+        btnEl.href = decodeURIComponent(link);
+        btnEl.classList.remove('disabled');
+      } else {
+        btnEl.removeAttribute('href');
+        btnEl.classList.add('disabled');
+      }
 
       function showNotes(notes) {
         if (!notes) return;
@@ -617,7 +630,8 @@
               filmEl.classList.remove('loading-pulse');
             }
             if (!link && data.driveLink) {
-              document.querySelector('.btn-download').href = data.driveLink;
+              btnEl.href = data.driveLink;
+              btnEl.classList.remove('disabled'); // Unfreeze the button!
             }
             if (!notesFromUrl && data.notes) {
               showNotes(data.notes);
