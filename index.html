@@ -400,6 +400,14 @@
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(18px); }
       to   { opacity: 1; transform: translateY(0); }
+/* loading pulse animation */
+    @keyframes pulseText {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+    .loading-pulse {
+      animation: pulseText 1.5s infinite ease-in-out;
     }
 
     /* mobile */
@@ -563,19 +571,24 @@
       const link  = params.get('link');
       const notesFromUrl = params.get('notes');
 
- // 1. Fill data from URL if it exists, otherwise show analog loading text
+      const nameEl = document.querySelector('.ready-name');
+      const filmEl = document.querySelector('.ready-sub');
+
+      // 1. Fill data from URL if it exists, otherwise show animated loading text
       if (order) document.getElementById('order-display').textContent = order;
       
       if (name) {
-        document.querySelector('.ready-name').textContent = name;
+        nameEl.textContent = name;
       } else if (order) {
-        document.querySelector('.ready-name').textContent = "Film Developed!";
+        nameEl.textContent = "Film Developed!";
+        nameEl.classList.add('loading-pulse');
       }
 
       if (film) {
-        document.querySelector('.ready-sub').textContent = film;
+        filmEl.textContent = film;
       } else if (order) {
-        document.querySelector('.ready-sub').textContent = "Packing up your scans..";
+        filmEl.textContent = "Packing up your scans..";
+        filmEl.classList.add('loading-pulse');
       }
 
       if (link)  document.querySelector('.btn-download').href = decodeURIComponent(link);
@@ -593,21 +606,19 @@
         fetch(`${SHEETS_API}?action=getOrder&order=${encodeURIComponent(order)}`)
           .then(r => r.json())
           .then(data => {
-            if (!data || data.error) return; // Stop if order not found
+            if (!data || data.error) return; 
             
-            // Fill Name if missing from URL
             if (!name && data.customerName) {
-              document.querySelector('.ready-name').textContent = data.customerName;
+              nameEl.textContent = data.customerName;
+              nameEl.classList.remove('loading-pulse');
             }
-            // Fill Film if missing from URL
             if (!film && data.film) {
-              document.querySelector('.ready-sub').textContent = data.film;
+              filmEl.textContent = data.film;
+              filmEl.classList.remove('loading-pulse');
             }
-            // Fill Link if missing from URL
             if (!link && data.driveLink) {
               document.querySelector('.btn-download').href = data.driveLink;
             }
-            // Fill Notes if missing from URL
             if (!notesFromUrl && data.notes) {
               showNotes(data.notes);
             }
