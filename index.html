@@ -3,20 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Your scans from Saujana Film Lab Bali</title>
- <meta property="og:title" content="Fresh Scans Incoming | Saujana Film Lab Bali" />
-<meta property="og:description" content="Click the link to download your scans." />
-  <meta property="og:description" content="Your negatives have been developed. Click the link below to access your photos." />
-  <meta property="og:image" content="https://bali-scans.saujanalab.com/saujanaicon.png" />
-  <meta property="og:url" content="https://bali-scans.saujanalab.com/" />
-  <meta property="og:type" content="website" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <!-- Added ?v=2 to force the browser to clear its cache and load the icon -->
-  <link rel="icon" type="image/png" href="saujana-favicon.png?v=2" />
-  <link rel="apple-touch-icon" href="saujana-favicon.png?v=2" />
+  <title>Your Scans are Ready — Saujana Film Lab Bali</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
@@ -464,7 +453,7 @@
       <p class="ready-sub"><!-- FILM INFO -->Portra 400 · 35mm · 36 exp<!-- /FILM INFO --></p>
 
       <div class="download-wrap">
-        <a href="#" class="btn-download" target="_blank" rel="noopener" id="download-btn" style="opacity:0.4;pointer-events:none;">
+        <a href="#" class="btn-download" target="_blank" rel="noopener" id="download-btn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="7 10 12 15 17 10"/>
@@ -565,55 +554,35 @@
     const SHEETS_API = "https://script.google.com/macros/s/AKfycbyCCkm0VIH6jsuj6T68KktBiHgE3IKnDQEOgEogRExKxmQ4WHXaW9wK4C9gZ2hhlfk/exec";
 
     (function() {
-      const params = new URLSearchParams(window.location.search);
-      const order = params.get('order');
-      const name  = params.get('name');
-      const film  = params.get('film');
-      const link  = params.get('link');
-      // notes from URL still supported as fallback for old links
+      const params       = new URLSearchParams(window.location.search);
+      const order        = params.get('order');
+      const name         = params.get('name');
+      const film         = params.get('film');
+      const link         = params.get('link');
       const notesFromUrl = params.get('notes');
 
+      // Populate page instantly from URL params
       if (order) document.getElementById('order-display').textContent = order;
       if (name)  document.querySelector('.ready-name').textContent = name;
       if (film)  document.querySelector('.ready-sub').textContent = film;
-      // Drive link no longer in URL — fetched from Sheets below
+      if (link)  document.getElementById('download-btn').href = decodeURIComponent(link);
 
-      // Show notes from URL param first (legacy support), then try fetching from Sheets
       function showNotes(notes) {
         if (!notes) return;
         const notesEl = document.getElementById('order-notes-display');
-        notesEl.innerHTML = `<span style="display:block; padding:12px 16px; margin-bottom:16px; background:#161616; border-left:2px solid #444; border-radius:1px; font-style:normal; font-size:14px; color:var(--off-white); line-height:1.7;">📋 <strong>Order Note:</strong> ${notes}</span>`;
-      }
-
-      // Legacy: if link in URL (old links), apply it immediately
-      if (link) {
-        const btn = document.getElementById('download-btn');
-        btn.href = decodeURIComponent(link);
-        btn.style.opacity = '1';
-        btn.style.pointerEvents = 'auto';
+        if (notesEl) notesEl.innerHTML = `<span style="display:block; padding:12px 16px; margin-bottom:16px; background:#161616; border-left:2px solid #444; border-radius:1px; font-style:normal; font-size:14px; color:var(--off-white); line-height:1.7;">📋 <strong>Order Note:</strong> ${notes}</span>`;
       }
 
       if (notesFromUrl) showNotes(notesFromUrl);
 
-      // Fetch drive link + notes from Sheets
+      // Silently fetch notes from Sheets in background
       if (order) {
         fetch(`${SHEETS_API}?action=getOrder&order=${encodeURIComponent(order)}`)
           .then(r => r.json())
           .then(data => {
-            if (!data || data.error) return;
-            // Always prefer drive link from Sheets — most reliable source
-            if (data.driveLink) {
-              const btn = document.getElementById('download-btn');
-              btn.href = data.driveLink;
-              btn.style.opacity = '1';
-              btn.style.pointerEvents = 'auto';
-            }
-            // Show notes if present
-            if (data.notes && !notesFromUrl) {
-              showNotes(data.notes);
-            }
+            if (data && data.notes && !notesFromUrl) showNotes(data.notes);
           })
-          .catch(() => {}); // fail silently
+          .catch(() => {});
       }
     })();
   </script>
