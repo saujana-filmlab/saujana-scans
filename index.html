@@ -589,8 +589,8 @@
           .then(data => {
   console.log("ORDER FETCH:", data);
 
-  if (data && data.notes && !notesFromUrl) {
-    showNotes(data.notes);
+  if (data && data.Notes && !notesFromUrl) {
+    showNotes(data.Notes);
   }
 })
           .catch(() => {});
