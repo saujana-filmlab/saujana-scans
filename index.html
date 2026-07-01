@@ -582,17 +582,23 @@
 
       if (notesFromUrl) showNotes(notesFromUrl);
 
-      // Silently fetch notes from Sheets in background
+     // Silently fetch notes from Sheets in background
       if (order) {
         fetch(`${SHEETS_API}?action=getOrder&order=${encodeURIComponent(order)}`)
           .then(r => r.json())
           .then(data => {
-  console.log("ORDER FETCH:", data);
+            console.log("ORDER FETCH:", data);
 
-  if (data && data.Notes && !notesFromUrl) {
-    showNotes(data.Notes);
-  }
-})
+            // Use data.Notes (capital N) if that is what your console shows
+            // Remove !notesFromUrl to stop blocking the database update
+            if (data && (data.notes || data.Notes)) {
+              showNotes(data.notes || data.Notes);
+            }
+          })
+          .catch(error => {
+            console.error("Fetch error:", error);
+          });
+      }
           .catch(() => {});
       }
     })();
