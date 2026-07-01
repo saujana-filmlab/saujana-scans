@@ -587,8 +587,12 @@
         fetch(`${SHEETS_API}?action=getOrder&order=${encodeURIComponent(order)}`)
           .then(r => r.json())
           .then(data => {
-            if (data && data.notes && !notesFromUrl) showNotes(data.notes);
-          })
+  console.log("ORDER FETCH:", data);
+
+  if (data && data.notes && !notesFromUrl) {
+    showNotes(data.notes);
+  }
+})
           .catch(() => {});
       }
     })();
