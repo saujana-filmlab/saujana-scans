@@ -5,6 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Your Scans are Ready — Saujana Film Lab Bali</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet" />
+  <!-- WhatsApp / Social Media Preview Tags -->
+  <meta property="og:title" content="Your scans are done! 🎞️" />
+  <meta property="og:description" content="Fresh from our scanner, delivered to you!" />
+  <meta property="og:image" content="https://saujanalab.com/sb-scans-done.png" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://saujanalab.com/" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Your scans are done! 🎞️" />
+  <meta name="twitter:description" content="Fresh from our scanner, delivered to you!" />
+  <meta name="twitter:image" content="https://saujanalab.com/sb-scans-done.png" />
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -575,21 +587,17 @@
 
       if (notesFromUrl) showNotes(notesFromUrl);
 
-      // Fetch notes from Sheets in background
+      // Silently fetch notes from Sheets in background
       if (order) {
-        fetch(`${SHEETS_API}?action=getOrder&order=${encodeURIComponent(order)}`, {
-          redirect: "follow",
-          method: "GET",
-        })
-          .then(r => r.text())
-          .then(text => {
-            try {
-              const data = JSON.parse(text);
-              if (data && data.notes && String(data.notes).trim()) {
-                showNotes(data.notes);
-              }
-            } catch(e) {}
-          })
+        fetch(`${SHEETS_API}?action=getOrder&order=${encodeURIComponent(order)}`)
+          .then(r => r.json())
+          .then(data => {
+  console.log("ORDER FETCH:", data);
+
+  if (data && data.notes && !notesFromUrl) {
+    showNotes(data.notes);
+  }
+})
           .catch(() => {});
       }
     })();
