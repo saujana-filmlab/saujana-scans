@@ -428,7 +428,13 @@
 
     /* contact sheets */
     .page { max-width: 1040px; }
-    .logo-wrap img { width: 260px; max-height: 118px; }
+    .logo-wrap img {
+      display: block;
+      width: 260px;
+      height: auto;
+      max-height: none;
+      object-fit: contain;
+    }
     .ready-card { padding: 58px 52px; }
     .btn-download {
       width: 100%; justify-content: center; gap: 12px;
