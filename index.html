@@ -780,7 +780,9 @@
           .then(data => {
             if (!data || data.error) return;
             if (data.customerName) document.querySelector('.ready-name').textContent = data.customerName;
-            if (data.film) document.querySelector('.ready-sub').textContent = data.film;
+            // A customer-facing roll summary in the delivery URL takes priority over
+            // the operational roll list stored in the Orders sheet.
+            if (data.film && !film) document.querySelector('.ready-sub').textContent = data.film;
             if (data.driveLink) document.getElementById('download-btn').href = data.driveLink;
             if (data.notes && !notesFromUrl) showNotes(data.notes);
             renderContactSheets(data.contactSheets);
