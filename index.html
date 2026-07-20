@@ -664,10 +664,15 @@
       async function shareRemoteFile(url, fileName, filmName) {
         const file = await getRemoteFile(url, fileName);
         if (navigator.canShare && navigator.canShare({files:[file]})) {
-          await navigator.share({files:[file], title:`${filmName} contact sheet`});
-        } else {
-          await downloadRemoteFile(url, fileName);
+          try {
+            await navigator.share({files:[file], title:`${filmName} Story contact sheet`});
+            return;
+          } catch (error) {
+            if (error && error.name === 'AbortError') return;
+          }
         }
+        await downloadRemoteFile(url, fileName);
+        window.alert('The 1080 × 1920 Story image has been downloaded. Open Instagram, create a Story, then choose this image.');
       }
 
       function makeContactButton(label, icon, onClick) {
@@ -727,7 +732,7 @@
           actions.className = 'contact-actions';
           actions.append(
             makeContactButton('Download contact sheet','icon-contact-download.png',() => downloadRemoteFile(sheet.deliveryUrl,`${fileBase}_contact-4x3.jpg`)),
-            makeContactButton('Share contact sheet','icon-contact-share.png',() => shareRemoteFile(sheet.storyUrl,`${fileBase}_contact-story.jpg`,filmName))
+            makeContactButton('Share Story image','icon-contact-share.png',() => shareRemoteFile(sheet.storyUrl,`${fileBase}_contact-story.jpg`,filmName))
           );
           slide.append(preview,caption,actions);
           slidesRoot.appendChild(slide);
