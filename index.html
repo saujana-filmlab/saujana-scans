@@ -447,7 +447,8 @@
     .contact-stage { position: relative; padding: 8px; background: #090909; border: 1px solid #242424; }
     .contact-slide { display: none; text-align: left; }
     .contact-slide.active { display: block; }
-    .contact-slide > img { display: block; width: 100%; height: auto; }
+    .contact-slide > picture { display: block; }
+    .contact-slide > picture > img { display: block; width: 100%; height: auto; }
     .contact-caption { display: flex; justify-content: space-between; gap: 16px; padding: 11px 3px 3px; color: var(--muted); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; }
     .contact-caption strong { color: var(--light); font-weight: 500; }
     .contact-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
@@ -649,29 +650,30 @@
         return new File([await response.blob()], fileName, {type:'image/jpeg'});
       }
 
-      async function downloadRemoteFile(url, fileName) {
-        const file = await getRemoteFile(url, fileName);
-        const objectUrl = URL.createObjectURL(file);
+      function downloadRemoteFile(url, fileName) {
+        const downloadUrl = new URL(url, window.location.href);
+        downloadUrl.searchParams.set('download', fileName);
         const link = document.createElement('a');
-        link.href = objectUrl;
-        link.download = file.name;
+        link.href = downloadUrl.href;
+        link.download = fileName;
+        link.target = '_blank';
+        link.rel = 'noopener';
         document.body.appendChild(link);
         link.click();
         link.remove();
-        setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
       }
 
       async function shareRemoteFile(url, fileName) {
-        const file = await getRemoteFile(url, fileName);
-        if (navigator.canShare && navigator.canShare({files:[file]})) {
-          try {
+        try {
+          const file = await getRemoteFile(url, fileName);
+          if (navigator.canShare && navigator.canShare({files:[file]})) {
             await navigator.share({files:[file]});
             return;
-          } catch (error) {
-            if (error && error.name === 'AbortError') return;
           }
+        } catch (error) {
+          if (error && error.name === 'AbortError') return;
         }
-        await downloadRemoteFile(url, fileName);
+        downloadRemoteFile(url, fileName);
         window.alert('The contact sheet has been downloaded. You can share it from your Photos or Files app.');
       }
 
@@ -719,6 +721,11 @@
           preview.src = sheet.deliveryUrl;
           preview.alt = `${filmName} contact sheet`;
           preview.loading = index ? 'lazy' : 'eager';
+          const picture = document.createElement('picture');
+          const mobileSource = document.createElement('source');
+          mobileSource.media = '(max-width: 760px)';
+          mobileSource.srcset = sheet.storyUrl;
+          picture.append(mobileSource,preview);
 
           const caption = document.createElement('div');
           caption.className = 'contact-caption';
@@ -731,10 +738,16 @@
           const actions = document.createElement('div');
           actions.className = 'contact-actions';
           actions.append(
-            makeContactButton('Download contact sheet','icon-contact-download.png',() => downloadRemoteFile(sheet.deliveryUrl,`${fileBase}_contact-4x3.jpg`)),
+            makeContactButton('Download contact sheet','icon-contact-download.png',() => {
+              const mobile = window.matchMedia('(max-width: 760px)').matches;
+              downloadRemoteFile(
+                mobile ? sheet.storyUrl : sheet.deliveryUrl,
+                `${fileBase}_${mobile?'contact-story':'contact-4x3'}.jpg`
+              );
+            }),
             makeContactButton('Share contact sheet','icon-contact-share.png',() => shareRemoteFile(sheet.storyUrl,`${fileBase}_contact-story.jpg`))
           );
-          slide.append(preview,caption,actions);
+          slide.append(picture,caption,actions);
           slidesRoot.appendChild(slide);
 
           const dot = document.createElement('button');
