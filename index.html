@@ -442,8 +442,49 @@
       box-shadow: 0 8px 22px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.24);
     }
     .btn-download::before { background: #e0aa3e; }
+    .btn-download.is-disabled {
+      opacity: .48;
+      cursor: wait;
+      pointer-events: none;
+      box-shadow: none;
+    }
     .button-image-icon { width: 24px; height: 24px; object-fit: contain; flex: 0 0 24px; position: relative; z-index: 1; }
     .contact-sheets { margin-top: 36px; padding-top: 28px; border-top: 1px solid #242424; }
+    .contact-sheets.is-loading { min-height: 280px; }
+    .contact-loading-state {
+      min-height: 250px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 36px 24px;
+      background: #090909;
+      border: 1px solid #242424;
+      text-align: center;
+    }
+    .contact-loading-state[hidden], .contact-stage[hidden] { display: none; }
+    .contact-loading-mark {
+      width: 34px;
+      height: 34px;
+      margin-bottom: 7px;
+      border: 2px solid #343434;
+      border-top-color: #d19a2a;
+      border-radius: 50%;
+      animation: contact-loading-spin .9s linear infinite;
+    }
+    .contact-loading-state strong {
+      color: var(--off-white);
+      font: 500 11px 'Montserrat',sans-serif;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+    .contact-loading-state span {
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: .06em;
+    }
+    @keyframes contact-loading-spin { to { transform: rotate(360deg); } }
     .contact-stage { position: relative; padding: 8px; background: #090909; border: 1px solid #242424; }
     .contact-slide { display: none; text-align: left; }
     .contact-slide.active { display: block; }
@@ -511,7 +552,12 @@
       <p class="ready-sub"><!-- FILM INFO -->Portra 400 · 35mm · 36 exp<!-- /FILM INFO --></p>
 
       <div class="contact-sheets" id="contact-sheets" hidden>
-        <div class="contact-stage" id="contact-stage">
+        <div class="contact-loading-state" id="contact-loading-state" role="status" aria-live="polite" hidden>
+          <div class="contact-loading-mark" aria-hidden="true"></div>
+          <strong>Rollo is arranging your scans...</strong>
+          <span>Your contact sheet will be ready in a moment.</span>
+        </div>
+        <div class="contact-stage" id="contact-stage" hidden>
           <div id="contact-slides"></div>
           <button class="contact-nav contact-prev" id="contact-prev" type="button" aria-label="Previous roll">‹</button>
           <button class="contact-nav contact-next" id="contact-next" type="button" aria-label="Next roll">›</button>
@@ -623,12 +669,53 @@
       const film         = params.get('film');
       const link         = params.get('link');
       const notesFromUrl = params.get('notes');
+      const sheetMode    = params.get('sheets');
+      const contactSection = document.getElementById('contact-sheets');
+      const contactLoading = document.getElementById('contact-loading-state');
+      const contactStage = document.getElementById('contact-stage');
+      const downloadButton = document.getElementById('download-btn');
+      const downloadButtonText = downloadButton.querySelector('span');
+      let contactGateTimer = null;
 
       // Populate page instantly from URL params
       if (order) document.getElementById('order-display').textContent = order;
       if (name)  document.querySelector('.ready-name').textContent = name;
       if (film)  document.querySelector('.ready-sub').textContent = film;
-      if (link)  document.getElementById('download-btn').href = decodeURIComponent(link);
+      if (link)  downloadButton.href = decodeURIComponent(link);
+
+      function setFullResolutionReady(ready) {
+        downloadButton.classList.toggle('is-disabled', !ready);
+        downloadButton.setAttribute('aria-disabled', ready ? 'false' : 'true');
+        if (ready) {
+          downloadButton.removeAttribute('tabindex');
+          downloadButtonText.textContent = 'Download Full-Resolution Scans';
+        } else {
+          downloadButton.setAttribute('tabindex','-1');
+          downloadButtonText.textContent = 'Preparing your scans...';
+        }
+      }
+
+      function beginContactSheetCheck() {
+        contactSection.hidden = false;
+        contactSection.classList.add('is-loading');
+        contactLoading.hidden = false;
+        contactStage.hidden = true;
+        setFullResolutionReady(false);
+        contactGateTimer = window.setTimeout(() => setFullResolutionReady(true), 8000);
+      }
+
+      function finishContactSheetCheck(hasSheets) {
+        if (contactGateTimer) window.clearTimeout(contactGateTimer);
+        contactGateTimer = null;
+        contactSection.classList.remove('is-loading');
+        contactLoading.hidden = true;
+        contactStage.hidden = !hasSheets;
+        contactSection.hidden = !hasSheets;
+        setFullResolutionReady(true);
+      }
+
+      if (order && sheetMode !== '0') beginContactSheetCheck();
+      else setFullResolutionReady(true);
 
       function showNotes(notes) {
         if (!notes) return;
@@ -702,7 +789,7 @@
         const validSheets = Array.isArray(sheets)
           ? sheets.filter(sheet => sheet && sheet.deliveryUrl && sheet.storyUrl)
           : [];
-        if (!validSheets.length) return;
+        if (!validSheets.length) return false;
 
         const section = document.getElementById('contact-sheets');
         const slidesRoot = document.getElementById('contact-slides');
@@ -769,6 +856,14 @@
         next.addEventListener('click',() => show(current+1));
         previous.hidden = next.hidden = dotsRoot.hidden = validSheets.length < 2;
         section.hidden = false;
+        const firstPreview = slides[0].querySelector('img');
+        const revealContactSheets = () => finishContactSheetCheck(true);
+        if (firstPreview.complete) revealContactSheets();
+        else {
+          firstPreview.addEventListener('load',revealContactSheets,{once:true});
+          firstPreview.addEventListener('error',revealContactSheets,{once:true});
+        }
+        return true;
       }
 
       if (notesFromUrl) showNotes(notesFromUrl);
@@ -783,11 +878,11 @@
             // A customer-facing roll summary in the delivery URL takes priority over
             // the operational roll list stored in the Orders sheet.
             if (data.film && !film) document.querySelector('.ready-sub').textContent = data.film;
-            if (data.driveLink) document.getElementById('download-btn').href = data.driveLink;
+            if (data.driveLink) downloadButton.href = data.driveLink;
             if (data.notes && !notesFromUrl) showNotes(data.notes);
-            renderContactSheets(data.contactSheets);
+            if (!renderContactSheets(data.contactSheets)) finishContactSheetCheck(false);
           })
-          .catch(() => {});
+          .catch(() => finishContactSheetCheck(false));
       }
     })();
   </script>
