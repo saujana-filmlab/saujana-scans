@@ -628,11 +628,11 @@
           <div class="contact-actions">
             <button class="contact-button" id="contact-download-selected" type="button">
               <img class="button-image-icon" src="icon-contact-download.png" alt="" aria-hidden="true">
-              <span>Download contact sheets</span>
+              <span>Download contact sheet</span>
             </button>
             <button class="contact-button" id="contact-share-selected" type="button">
               <img class="button-image-icon" src="icon-contact-share.png" alt="" aria-hidden="true">
-              <span>Share contact sheets</span>
+              <span>Share contact sheet</span>
             </button>
           </div>
         </div>
@@ -902,12 +902,6 @@
         link.remove();
       }
 
-      async function downloadRemoteFiles(files) {
-        files.forEach((file,index) => {
-          window.setTimeout(() => downloadRemoteFile(file.url,file.fileName), index * 220);
-        });
-      }
-
       async function shareRemoteFile(url, fileName) {
         try {
           const file = await getRemoteFile(url, fileName);
@@ -920,20 +914,6 @@
         }
         downloadRemoteFile(url, fileName);
         window.alert('The contact sheet has been downloaded. You can share it from your Photos or Files app.');
-      }
-
-      async function shareRemoteFiles(files) {
-        try {
-          const preparedFiles = await Promise.all(files.map(file => getRemoteFile(file.url,file.fileName)));
-          if (navigator.canShare && navigator.canShare({files:preparedFiles})) {
-            await navigator.share({files:preparedFiles});
-            return;
-          }
-        } catch (error) {
-          if (error && error.name === 'AbortError') return;
-        }
-        await downloadRemoteFiles(files);
-        window.alert('The contact sheets have been downloaded. You can share them from your Photos or Files app.');
       }
 
       function withButtonBusy(button, onClick) {
@@ -967,13 +947,14 @@
           ? (sheet.storyUrl || sheet.deliveryUrl)
           : (sheet.deliveryUrl || sheet.storyUrl);
         const getFileSuffix = () => selectedFormat === 'portrait' ? 'contact-story' : 'contact-4x3';
-        const getSelectedFiles = () => validSheets.map((sheet,index) => {
-          const filmName = sheet.filmName || `Roll ${index+1}`;
+        const getCurrentFile = () => {
+          const sheet = validSheets[current];
+          const filmName = sheet.filmName || `Roll ${current+1}`;
           return {
             url: getSheetUrl(sheet),
             fileName: `${safeFileName(filmName)}_${getFileSuffix()}.jpg`
           };
-        });
+        };
         const updateContactFormat = format => {
           selectedFormat = format === 'portrait' ? 'portrait' : 'landscape';
           stage.dataset.format = selectedFormat;
@@ -1026,8 +1007,14 @@
         formatButtons.forEach(button => {
           button.addEventListener('click',() => updateContactFormat(button.dataset.format || 'landscape'));
         });
-        withButtonBusy(downloadSelected,() => downloadRemoteFiles(getSelectedFiles()));
-        withButtonBusy(shareSelected,() => shareRemoteFiles(getSelectedFiles()));
+        withButtonBusy(downloadSelected,() => {
+          const file = getCurrentFile();
+          downloadRemoteFile(file.url,file.fileName);
+        });
+        withButtonBusy(shareSelected,() => {
+          const file = getCurrentFile();
+          return shareRemoteFile(file.url,file.fileName);
+        });
         updateContactFormat(selectedFormat);
         section.hidden = false;
         const firstPreview = slides[0].querySelector('img');
