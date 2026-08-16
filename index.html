@@ -808,10 +808,15 @@
       const deliveryDate = params.get('date');
       const contactSection = document.getElementById('contact-sheets');
       const contactLoading = document.getElementById('contact-loading-state');
+      const contactLoadingText = contactLoading.querySelector('span');
       const contactStage = document.getElementById('contact-stage');
       const downloadButton = document.getElementById('download-btn');
       const downloadButtonText = downloadButton.querySelector('span');
       let contactGateTimer = null;
+      const expectContactSheets = sheetMode === '1';
+      const contactRetryLimit = 3;
+      const contactRetryDelay = 1200;
+      const orderFetchTimeout = 6000;
 
       function showDeliveryDate(value) {
         let date;
@@ -853,9 +858,15 @@
         contactSection.hidden = false;
         contactSection.classList.add('is-loading');
         contactLoading.hidden = false;
+        contactLoadingText.textContent = 'Your contact sheet will be ready in a moment.';
         contactStage.hidden = true;
         setFullResolutionReady(false);
-        contactGateTimer = window.setTimeout(() => setFullResolutionReady(true), 8000);
+        // Older links without an explicit sheet mode retain the short safety
+        // release. When sheets=1, retries own the gate so a slow first request
+        // cannot expose the full-resolution button before sheets are checked.
+        if (!expectContactSheets) {
+          contactGateTimer = window.setTimeout(() => setFullResolutionReady(true), 8000);
+        }
       }
 
       function finishContactSheetCheck(hasSheets) {
@@ -1032,21 +1043,50 @@
       if (notesFromUrl) showNotes(notesFromUrl);
 
       // Fetch the authoritative order record and any published contact sheets.
-      if (order) {
-        fetch(`${SHEETS_API}?action=getOrder&order=${encodeURIComponent(order)}`)
-          .then(r => r.json())
+      async function fetchOrderJson() {
+        const controller = new AbortController();
+        const timer = window.setTimeout(() => controller.abort(), orderFetchTimeout);
+        try {
+          const response = await fetch(`${SHEETS_API}?action=getOrder&order=${encodeURIComponent(order)}&_=${Date.now()}`, {
+            cache:'no-store',
+            signal:controller.signal
+          });
+          return await response.json();
+        } finally {
+          window.clearTimeout(timer);
+        }
+      }
+
+      function fetchOrderRecord(attempt) {
+        fetchOrderJson()
           .then(data => {
-            if (!data || data.error) return;
+            if (!data || data.error) {
+              if (expectContactSheets && attempt < contactRetryLimit) return retryOrderRecord(attempt);
+              finishContactSheetCheck(false);
+              return;
+            }
             if (data.customerName) document.querySelector('.ready-name').textContent = data.customerName;
             // A customer-facing roll summary in the delivery URL takes priority over
             // the operational roll list stored in the Orders sheet.
             if (data.film && !film) document.querySelector('.ready-sub').textContent = data.film;
             if (data.driveLink) downloadButton.href = data.driveLink;
             if (data.notes && !notesFromUrl) showNotes(data.notes);
-            if (!renderContactSheets(data.contactSheets)) finishContactSheetCheck(false);
+            if (renderContactSheets(data.contactSheets)) return;
+            if (expectContactSheets && attempt < contactRetryLimit) return retryOrderRecord(attempt);
+            finishContactSheetCheck(false);
           })
-          .catch(() => finishContactSheetCheck(false));
+          .catch(() => {
+            if (expectContactSheets && attempt < contactRetryLimit) return retryOrderRecord(attempt);
+            finishContactSheetCheck(false);
+          });
       }
+
+      function retryOrderRecord(attempt) {
+        contactLoadingText.textContent = `Still checking contact sheets... ${attempt + 1}/${contactRetryLimit}`;
+        window.setTimeout(() => fetchOrderRecord(attempt + 1), contactRetryDelay * (attempt + 1));
+      }
+
+      if (order) fetchOrderRecord(0);
     })();
   </script>
 
