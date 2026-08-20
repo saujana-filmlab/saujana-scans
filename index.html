@@ -795,7 +795,10 @@
 
 
   <script>
-    const SHEETS_API = "https://script.google.com/macros/s/AKfycbyCCkm0VIH6jsuj6T68KktBiHgE3IKnDQEOgEogRExKxmQ4WHXaW9wK4C9gZ2hhlfk/exec";
+    const LEGACY_SHEETS_API = "https://script.google.com/macros/s/AKfycbyCCkm0VIH6jsuj6T68KktBiHgE3IKnDQEOgEogRExKxmQ4WHXaW9wK4C9gZ2hhlfk/exec";
+    const DISPATCH_API = "https://bali-dispatch-api.saujanalab-bali.workers.dev";
+    const LOCAL_DISPATCH_API = "http://127.0.0.1:8799";
+    const ORDER_API_TIMEOUT_MS = 7000;
 
     (function() {
       const params       = new URLSearchParams(window.location.search);
@@ -812,6 +815,53 @@
       const downloadButton = document.getElementById('download-btn');
       const downloadButtonText = downloadButton.querySelector('span');
       let contactGateTimer = null;
+
+      function getOrderApiUrls(orderNumber) {
+        const apiMode = params.get('api');
+        const encodedOrder = encodeURIComponent(orderNumber);
+        const urls = [];
+        const isLocalPreview = window.location.protocol === 'file:'
+          || window.location.hostname === 'localhost'
+          || window.location.hostname === '127.0.0.1';
+
+        if (apiMode !== 'legacy') {
+          if (isLocalPreview) urls.push(`${LOCAL_DISPATCH_API}/?action=getOrder&order=${encodedOrder}`);
+          urls.push(`${DISPATCH_API}/?action=getOrder&order=${encodedOrder}`);
+        }
+        urls.push(`${LEGACY_SHEETS_API}?action=getOrder&order=${encodedOrder}`);
+        return [...new Set(urls)];
+      }
+
+      async function fetchJsonWithTimeout(url, timeoutMs) {
+        const controller = new AbortController();
+        const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
+        try {
+          const response = await fetch(url,{signal:controller.signal});
+          if (!response.ok) throw new Error(`Order API returned ${response.status}`);
+          return await response.json();
+        } finally {
+          window.clearTimeout(timeout);
+        }
+      }
+
+      async function fetchOrderRecord(orderNumber) {
+        let firstValidRecord = null;
+        const needsContactSheets = sheetMode !== '0';
+        for (const url of getOrderApiUrls(orderNumber)) {
+          try {
+            const data = await fetchJsonWithTimeout(url,ORDER_API_TIMEOUT_MS);
+            if (data && !data.error) {
+              if (!firstValidRecord) firstValidRecord = data;
+              const hasContactSheets = Array.isArray(data.contactSheets)
+                && data.contactSheets.some(sheet => sheet && (sheet.deliveryUrl || sheet.storyUrl));
+              if (!needsContactSheets || hasContactSheets) return data;
+            }
+          } catch (error) {
+            console.warn('Could not load order record from this source',error);
+          }
+        }
+        return firstValidRecord;
+      }
 
       function showDeliveryDate(value) {
         let date;
@@ -1033,10 +1083,12 @@
 
       // Fetch the authoritative order record and any published contact sheets.
       if (order) {
-        fetch(`${SHEETS_API}?action=getOrder&order=${encodeURIComponent(order)}`)
-          .then(r => r.json())
+        fetchOrderRecord(order)
           .then(data => {
-            if (!data || data.error) return;
+            if (!data || data.error) {
+              finishContactSheetCheck(false);
+              return;
+            }
             if (data.customerName) document.querySelector('.ready-name').textContent = data.customerName;
             // A customer-facing roll summary in the delivery URL takes priority over
             // the operational roll list stored in the Orders sheet.
