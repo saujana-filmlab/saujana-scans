@@ -22,7 +22,8 @@
   <meta name="twitter:title" content="Your scans are done! 🎞️" />
   <meta name="twitter:description" content="Fresh from our scanner, delivered to you!" />
   <meta name="twitter:image" content="https://bali-scans.saujanalab.com/sb-scans-done-wide.png" />
-  <link rel="stylesheet" href="bali-delivery-trial.css" />
+  <link rel="stylesheet" href="bali-delivery-trial.css?v=20261012-negatives" />
+  <script src="negative-collection.js?v=20261012"></script>
   <script>
     (() => {
       const previewParams = new URLSearchParams(window.location.search);
@@ -646,6 +647,10 @@
           <span>Download Full-Resolution Scans</span>
         </a>
       </div>
+      <div class="negative-collection-message" id="negative-collection-message" hidden>
+        <p class="negative-collection-label" id="negative-collection-label"></p>
+        <p id="negative-collection-copy"></p>
+      </div>
     </div>
 
     <!-- notice -->
@@ -653,7 +658,6 @@
       <span class="notice-icon">⏳</span>
       <p>
         <strong>Your download link is active for 7 days.</strong> Please save your scans before then.
-        Need us to hold onto your negatives? We store them for up to <strong>1 month upon request</strong> — just let us know.
       </p>
     </div>
 
@@ -809,6 +813,14 @@
       const notesFromUrl = params.get('notes');
       const sheetMode    = params.get('sheets');
       const deliveryDate = params.get('date');
+      const collectNegatives = SaujanaNegativeCollection.normalize(params.get('collectNegatives'));
+      function showNegatives(choice) {
+        const copy = SaujanaNegativeCollection.deliveryCopy(choice);
+        document.getElementById('negative-collection-label').textContent = copy?.title || '';
+        document.getElementById('negative-collection-copy').textContent = copy?.body || '';
+        document.getElementById('negative-collection-message').hidden = !copy;
+      }
+      showNegatives(collectNegatives);
       const contactSection = document.getElementById('contact-sheets');
       const contactLoading = document.getElementById('contact-loading-state');
       const contactStage = document.getElementById('contact-stage');
@@ -1095,6 +1107,8 @@
             if (data.film && !film) document.querySelector('.ready-sub').textContent = data.film;
             if (data.driveLink) downloadButton.href = data.driveLink;
             if (data.notes && !notesFromUrl) showNotes(data.notes);
+            // Only opted-in new links may show collection information. Older links stay unchanged.
+            if (collectNegatives && Object.prototype.hasOwnProperty.call(data,'collectNegatives')) showNegatives(data.collectNegatives);
             if (!renderContactSheets(data.contactSheets)) finishContactSheetCheck(false);
           })
           .catch(() => finishContactSheetCheck(false));

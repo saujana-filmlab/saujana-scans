@@ -8,6 +8,27 @@
 .theme-preview-switch { display: none; }
 .theme-action-icon { display: none; }
 
+.negative-collection-message {
+  margin-top:20px;
+  padding:14px 16px;
+  border:1px solid var(--bali-line, #333);
+  background:var(--bali-surface-raised, #171717);
+  color:var(--bali-paper, #eee);
+  font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size:13px;
+  line-height:1.65;
+  letter-spacing:0;
+  text-align:left;
+}
+
+.negative-collection-message[hidden] { display:none; }
+.negative-collection-label {
+  margin-bottom:5px;
+  font-size:11px;
+  font-weight:700;
+  color:var(--bali-accent, #c9a15c);
+}
+
 /* Preview-only site chrome stays out of the existing production theme. */
 .bali-header-meta,
 .bali-header-services,
