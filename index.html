@@ -1005,7 +1005,7 @@
         const downloadSelected = document.getElementById('contact-download-selected');
         const shareSelected = document.getElementById('contact-share-selected');
         let current = 0;
-        let selectedFormat = 'landscape';
+        let selectedFormat = window.matchMedia('(max-width: 720px)').matches ? 'portrait' : 'landscape';
 
         const getSheetUrl = sheet => selectedFormat === 'portrait'
           ? (sheet.storyUrl || sheet.deliveryUrl)
