@@ -1,0 +1,28 @@
+.roll-call-invite{--rc-invite-accent:var(--bali-accent,#c9a15c);--rc-invite-paper:var(--bali-paper,#eeece8);--rc-invite-copy:var(--bali-copy,#bcbcbc);--rc-invite-line:var(--bali-line,#383838);margin:0 0 32px;border-top:1px solid var(--rc-invite-line);border-bottom:1px solid var(--rc-invite-line);font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;text-align:left;letter-spacing:0}
+.roll-call-invite[hidden],.roll-call-invite [hidden]{display:none!important}
+.roll-call-member-link{display:grid;grid-template-columns:124px minmax(0,1fr);align-items:center;gap:38px;min-height:256px;padding:28px 20px;color:var(--rc-invite-paper);text-decoration:none;isolation:isolate}
+.roll-call-member-link:focus-visible{outline:2px solid var(--rc-invite-accent);outline-offset:5px}
+.roll-call-art{position:relative;display:block;width:112px;aspect-ratio:1223/2000;perspective:800px;justify-self:center}
+.roll-call-art-back,.roll-call-art-front{position:absolute;inset:0;width:100%;height:100%;border-radius:3px;box-shadow:0 8px 18px #0006;transform-origin:50% 84%;transition:transform 280ms ease}
+.roll-call-art-back{object-fit:contain;transform:translate(8px,0) rotate(7deg)}
+.roll-call-art-front{display:block;overflow:hidden;transform:rotate(-5deg);animation:rc-invite-arrive 650ms cubic-bezier(.2,.75,.3,1) backwards}
+.roll-call-art-front>img{display:block;width:100%;height:100%;object-fit:contain}
+.roll-call-art-number{position:absolute;top:2.7%;right:9%;width:13%;height:2.3%;text-align:center;font:700 4px/1.4 "Courier New",monospace;color:#171717;background:#f0e9da}
+.roll-call-art-front::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 28%,#fff6 46%,transparent 64%);transform:translateX(-140%);animation:rc-invite-light 900ms ease 500ms 1 both;pointer-events:none}
+.roll-call-invite-copy{display:flex;align-items:flex-start;flex-direction:column;min-width:0;gap:0}
+.roll-call-invite-label{color:var(--rc-invite-copy);font:400 12px/1.4 "Helvetica Neue",Helvetica,Arial,sans-serif;margin-top:5px;letter-spacing:0}
+.roll-call-invite-title{color:var(--rc-invite-accent);font-size:24px;font-weight:700;line-height:1.16;letter-spacing:0;overflow-wrap:anywhere}
+.roll-call-invite-name{font-size:14px;font-weight:600;line-height:1.4;margin-top:12px;overflow-wrap:anywhere;max-width:100%}
+.roll-call-invite-number{font:400 10px/1.6 "Courier New",monospace;color:var(--rc-invite-copy);overflow-wrap:anywhere;max-width:100%;margin-top:2px}
+.roll-call-invite-progress{color:var(--rc-invite-copy);font-size:12px;line-height:1.5;margin-top:10px}
+.roll-call-invite-reward{font-size:11px;line-height:1.5;color:var(--rc-invite-copy);margin-top:3px}
+.roll-call-invite.has-reward .roll-call-invite-reward{color:var(--rc-invite-accent);font-weight:700}
+.roll-call-invite.has-reward .roll-call-invite-reward::before{content:"";display:inline-block;width:5px;height:5px;background:currentColor;margin:0 6px 2px 0;transform:rotate(45deg)}
+.roll-call-invite-action{font-size:12px;line-height:1.5;font-weight:700;color:var(--rc-invite-accent);margin-top:17px;border-bottom:1px solid var(--rc-invite-accent);padding-bottom:3px}
+.roll-call-invite-action>span{display:inline-block;margin-left:10px;transition:transform 200ms ease}
+@media(hover:hover) and (pointer:fine){.roll-call-member-link:hover .roll-call-art-front{transform:translateY(-4px) rotate(-8deg)}.roll-call-member-link:hover .roll-call-art-back{transform:translate(12px,-2px) rotate(10deg)}.roll-call-member-link:hover .roll-call-invite-action>span{transform:translate(2px,-2px)}}
+@media(min-width:960px){.roll-call-member-link{grid-template-columns:150px minmax(0,1fr);max-width:760px;margin:auto;gap:42px}.roll-call-art{width:120px}.roll-call-invite-title{font-size:28px}}
+@media(max-width:480px){.roll-call-member-link{grid-template-columns:86px minmax(0,1fr);gap:32px;padding:25px 10px;min-height:236px}.roll-call-art{width:82px}.roll-call-art-number{font-size:3px}.roll-call-invite-title{font-size:21px}.roll-call-invite-name{font-size:13px}.roll-call-invite-number{font-size:9px}.roll-call-invite-progress{font-size:11px}.roll-call-invite-reward{font-size:10px}.roll-call-invite-label{font-size:9px}.roll-call-invite-action{font-size:11px}}
+@keyframes rc-invite-arrive{from{opacity:0;transform:translateY(12px) rotate(1deg)}to{opacity:1;transform:translateY(0) rotate(-5deg)}}
+@keyframes rc-invite-light{from{transform:translateX(-140%)}to{transform:translateX(140%)}}
+@media(prefers-reduced-motion:reduce){.roll-call-art-front,.roll-call-art-front::after{animation:none}.roll-call-art-front::after{display:none}.roll-call-art-front,.roll-call-art-back,.roll-call-invite-action>span{transition:none}}

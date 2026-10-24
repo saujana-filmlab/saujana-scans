@@ -23,6 +23,7 @@
   <meta name="twitter:description" content="Fresh from our scanner, delivered to you!" />
   <meta name="twitter:image" content="https://bali-scans.saujanalab.com/sb-scans-done-wide.png" />
   <link rel="stylesheet" href="bali-delivery-trial.css?v=20261012-negatives" />
+  <link rel="stylesheet" href="roll-call-link.css?v=20261024" />
   <script src="negative-collection.js?v=20261013-no-copy"></script>
   <script>
     (() => {
@@ -653,6 +654,24 @@
       </div>
     </div>
 
+    <section id="roll-call-wrap" class="roll-call-invite" aria-label="Your Roll Call membership" hidden>
+      <a id="roll-call-link" class="roll-call-member-link" href="#" rel="noreferrer" hidden>
+        <span class="roll-call-art" aria-hidden="true">
+          <img class="roll-call-art-back" src="roll-call/assets/roll-call-back.png" alt="" width="1223" height="2000" loading="lazy">
+          <span class="roll-call-art-front"><img src="roll-call/assets/roll-call-front.png" alt="" width="1223" height="2000" loading="lazy"><span class="roll-call-art-number" id="roll-call-art-number"></span></span>
+        </span>
+        <span class="roll-call-invite-copy">
+          <span class="roll-call-invite-title">ROLL CALL</span>
+          <span class="roll-call-invite-label">Member Card</span>
+          <span class="roll-call-invite-name" id="roll-call-member-name"></span>
+          <span class="roll-call-invite-number" id="roll-call-member-number"></span>
+          <span class="roll-call-invite-progress" id="roll-call-member-progress"></span>
+          <span class="roll-call-invite-reward" id="roll-call-member-reward" hidden></span>
+          <span class="roll-call-invite-action">Open your card <span aria-hidden="true">↗</span></span>
+        </span>
+      </a>
+    </section>
+
     <!-- notice -->
     <div class="notice">
       <span class="notice-icon">⏳</span>
@@ -1116,5 +1135,6 @@
     })();
   </script>
 
+<script src="roll-call-link.js?v=20261024"></script>
 </body>
 </html>
