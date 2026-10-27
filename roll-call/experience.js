@@ -1,6 +1,9 @@
 (function () {
   const assetBase = new URL('assets/', document.currentScript.src).href;
   const pad = number => String(number).padStart(3, '0');
+  const displayCard = snapshot => snapshot.currentCard.stamps === 0 && snapshot.currentCard.number > 1
+    ? snapshot.cards.find(card => card.number === snapshot.currentCard.number - 1 && card.stamps === 10)?.number || snapshot.currentCard.number
+    : snapshot.currentCard.number;
   const date = value => value ? new Intl.DateTimeFormat('en-GB', {day:'numeric',month:'short',year:'numeric',timeZone:'Asia/Makassar'}).format(new Date(value)) : '';
   const cardDate = value => {
     if(!value) return null;
@@ -159,8 +162,8 @@
       const old = snapshot;
       const oldTotal = old?.totalStamps;
       snapshot = next;
-      if(!old || options.resetCard || chosenCard > next.currentCard.number) chosenCard = next.currentCard.number;
-      if(old && next.totalStamps > old.totalStamps) {chosenCard = next.currentCard.number;turn(true);}
+      if(!old || options.resetCard || chosenCard > next.currentCard.number || next.totalStamps !== old.totalStamps) chosenCard = displayCard(next);
+      if(old && next.totalStamps > old.totalStamps) turn(true);
       previousTotal = oldTotal ?? null;
       get('rc-story').textContent = story(next);
       picker.replaceChildren(...next.cards.map(card => {const option=node('option','',`Card ${pad(card.number)}`);option.value=card.number;return option;}));
