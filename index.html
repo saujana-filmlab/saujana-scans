@@ -23,7 +23,7 @@
   <meta name="twitter:description" content="Fresh from our scanner, delivered to you!" />
   <meta name="twitter:image" content="https://bali-scans.saujanalab.com/sb-scans-done-wide.png" />
   <link rel="stylesheet" href="bali-delivery-trial.css?v=20261012-negatives" />
-  <link rel="stylesheet" href="roll-call-link.css?v=20261024" />
+  <link rel="stylesheet" href="roll-call-link.css?v=20261101-recovery" />
   <script src="negative-collection.js?v=20261013-no-copy"></script>
   <script>
     (() => {
@@ -670,6 +670,12 @@
           <span class="roll-call-invite-action">Open your card <span aria-hidden="true">↗</span></span>
         </span>
       </a>
+      <div id="roll-call-load-error" class="roll-call-load-error" role="status" hidden>
+        <strong>ROLL CALL</strong>
+        <p>Your member card could not load right now.</p>
+        <button type="button" id="roll-call-retry">Try again</button>
+        <a id="roll-call-fallback-link" href="#" rel="noreferrer">Open your card ↗</a>
+      </div>
     </section>
 
     <!-- notice -->
@@ -1135,6 +1141,6 @@
     })();
   </script>
 
-<script src="roll-call-link.js?v=20261024"></script>
+<script src="roll-call-link.js?v=20261101-recovery"></script>
 </body>
 </html>
