@@ -27,6 +27,11 @@
       });
       const snapshot = await response.json();
       if(current !== revision) return;
+      if(snapshot.accessDisabled){
+        view=null;latestNumber=null;get('experience').replaceChildren();get('experience').hidden=true;
+        get('status').hidden=false;get('status-copy').textContent='This card is currently unavailable. Please contact the lab.';
+        get('retry').hidden=false;return;
+      }
       if(!response.ok || snapshot.error || !snapshot.member) throw Error('Card unavailable.');
       if(!view) view = window.RollCallExperience.create(get('experience'));
       view.update(snapshot);

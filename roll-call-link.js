@@ -21,6 +21,7 @@
       });
       const data=await response.json();
       if(current!==revision)return;
+      if(data.accessDisabled)return;
       if(data.error==='Card not found.')return;
       if(!response.ok||!data.member)throw Error('Card lookup failed');
       const stamps=Number(data.currentCard?.stamps)||0,card=Number(data.currentCard?.number)||1;
@@ -48,4 +49,6 @@
   }
   get('roll-call-retry')?.addEventListener('click',load);
   window.addEventListener('hashchange',load);load();
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)load();});
+  setInterval(()=>{if(!document.hidden&&!activeController)load();},30000);
 }());
