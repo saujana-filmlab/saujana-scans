@@ -648,6 +648,7 @@
           <span>Download Full-Resolution Scans</span>
         </a>
       </div>
+      <button type="button" id="delivery-retry" hidden style="margin:14px auto;padding:10px 16px;border:1px solid var(--bali-accent,#c9a15c);background:transparent;color:var(--bali-paper,#eeece8);font:700 13px Helvetica,Arial,sans-serif;cursor:pointer;">Retry delivery</button>
       <div class="negative-collection-message" id="negative-collection-message" hidden>
         <p class="negative-collection-label" id="negative-collection-label"></p>
         <p id="negative-collection-copy"></p>
@@ -851,6 +852,9 @@
       const contactStage = document.getElementById('contact-stage');
       const downloadButton = document.getElementById('download-btn');
       const downloadButtonText = downloadButton.querySelector('span');
+      const retryDelivery=document.getElementById('delivery-retry');
+      retryDelivery.addEventListener('click',()=>window.location.reload());
+      function failDelivery(){finishContactSheetCheck(false);setFullResolutionReady(false);downloadButtonText.textContent='Delivery unavailable. Please refresh or contact the lab.';retryDelivery.hidden=false;}
       let contactGateTimer = null;
 
       function getOrderApiUrls(orderNumber) {
@@ -891,10 +895,11 @@
               if (!firstValidRecord) firstValidRecord = data;
               const hasContactSheets = Array.isArray(data.contactSheets)
                 && data.contactSheets.some(sheet => sheet && (sheet.deliveryUrl || sheet.storyUrl));
-              if (!needsContactSheets || hasContactSheets) return data;
+              if (data.delivery || !needsContactSheets || hasContactSheets) return data;
             }
           } catch (error) {
             console.warn('Could not load order record from this source',error);
+            if(url.startsWith(DISPATCH_API)||url.startsWith(LOCAL_DISPATCH_API))throw error;
           }
         }
         return firstValidRecord;
@@ -942,7 +947,6 @@
         contactLoading.hidden = false;
         contactStage.hidden = true;
         setFullResolutionReady(false);
-        contactGateTimer = window.setTimeout(() => setFullResolutionReady(true), 8000);
       }
 
       function finishContactSheetCheck(hasSheets) {
@@ -957,11 +961,12 @@
 
       if (order && sheetMode !== '0') beginContactSheetCheck();
       else setFullResolutionReady(true);
+      if(order)setFullResolutionReady(false);
 
       function showNotes(notes) {
-        if (!notes) return;
         const notesEl = document.getElementById('order-notes-display');
         if (!notesEl) return;
+        if(!notes){notesEl.replaceChildren();return;}
         const note = document.createElement('span');
         note.style.cssText = 'display:block;padding:12px 16px;margin-bottom:16px;background:#161616;border-left:2px solid #444;border-radius:1px;font-style:normal;font-size:14px;color:var(--off-white);line-height:1.7;';
         const label = document.createElement('strong');
@@ -1123,20 +1128,31 @@
         fetchOrderRecord(order)
           .then(data => {
             if (!data || data.error) {
-              finishContactSheetCheck(false);
+              failDelivery();
               return;
             }
+            if(data.delivery){
+              const saved=data.delivery;
+              document.querySelector('.ready-name').textContent=saved.name;
+              document.querySelector('.ready-sub').textContent=saved.film;
+              document.documentElement.dataset.deliveryTheme='bali';
+              document.documentElement.dataset.negative=saved.theme;
+              if(saved.date)showDeliveryDate(saved.date);
+              downloadButton.href=saved.driveLink;
+              showNotes(saved.notes);
+            }else{
             if (data.customerName) document.querySelector('.ready-name').textContent = data.customerName;
             // A customer-facing roll summary in the delivery URL takes priority over
             // the operational roll list stored in the Orders sheet.
             if (data.film && !film) document.querySelector('.ready-sub').textContent = data.film;
             if (data.driveLink) downloadButton.href = data.driveLink;
             if (data.notes && !notesFromUrl) showNotes(data.notes);
+            }
             // Only opted-in new links may show collection information. Older links stay unchanged.
             if (collectNegatives && Object.prototype.hasOwnProperty.call(data,'collectNegatives')) showNegatives(data.collectNegatives);
             if (!renderContactSheets(data.contactSheets)) finishContactSheetCheck(false);
           })
-          .catch(() => finishContactSheetCheck(false));
+          .catch(failDelivery);
       }
     })();
   </script>
