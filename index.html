@@ -24,6 +24,8 @@
   <meta name="twitter:image" content="https://bali-scans.saujanalab.com/sb-scans-done-wide.png" />
   <link rel="stylesheet" href="bali-delivery-trial.css?v=20261012-negatives" />
   <link rel="stylesheet" href="roll-call-link.css?v=20261101-recovery" />
+  <link rel="stylesheet" href="roll-call-proof.css?v=20261117" />
+  <link rel="stylesheet" href="download-countdown.css" />
   <script src="negative-collection.js?v=20261013-no-copy"></script>
   <script>
     (() => {
@@ -649,25 +651,73 @@
         </a>
       </div>
       <button type="button" id="delivery-retry" hidden style="margin:14px auto;padding:10px 16px;border:1px solid var(--bali-accent,#c9a15c);background:transparent;color:var(--bali-paper,#eeece8);font:700 13px Helvetica,Arial,sans-serif;cursor:pointer;">Retry delivery</button>
-      <div class="negative-collection-message" id="negative-collection-message" hidden>
-        <p class="negative-collection-label" id="negative-collection-label"></p>
-        <p id="negative-collection-copy"></p>
-      </div>
     </div>
 
-    <section id="roll-call-wrap" class="roll-call-invite" aria-label="Your Roll Call membership" hidden>
+    <div class="download-reminders" id="download-reminders">
+    <svg width="0" height="0" class="download-countdown-filters" aria-hidden="true" focusable="false">
+      <defs>
+        <filter id="countdown-ink-colour" color-interpolation-filters="sRGB">
+          <feComponentTransfer>
+            <feFuncR type="table" tableValues=".12 .16 .48 .96 1"/>
+            <feFuncG type="table" tableValues=".042 .062 .18 .40 .74"/>
+            <feFuncB type="table" tableValues=".018 .030 .08 .18 .57"/>
+          </feComponentTransfer>
+        </filter>
+        <filter id="countdown-ink-classic" color-interpolation-filters="sRGB">
+          <feComponentTransfer>
+            <feFuncR type="table" tableValues=".08 .12 .37 .79 .96"/>
+            <feFuncG type="table" tableValues=".07 .10 .29 .63 .87"/>
+            <feFuncB type="table" tableValues=".06 .08 .19 .39 .68"/>
+          </feComponentTransfer>
+        </filter>
+      </defs>
+    </svg>
+    <div class="notice" id="download-reminder-fallback">
+      <span class="notice-icon">⏳</span>
+      <p>
+        <strong>Your download link is active for 7 days.</strong> Please save your scans before then.
+      </p>
+    </div>
+    <section class="download-countdown" id="download-countdown" aria-labelledby="download-countdown-title" hidden>
+      <div class="download-countdown-mascot"><img alt="" decoding="async" /></div>
+      <div class="download-countdown-copy">
+        <p class="download-countdown-label">DOWNLOAD REMINDER</p>
+        <h2 id="download-countdown-title"></h2>
+        <p id="download-countdown-copy"></p>
+        <time id="download-countdown-date"></time>
+      </div>
+      <div class="download-countdown-side">
+        <div class="download-countdown-frames" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <a class="download-reminders-whatsapp" id="download-countdown-action" href="https://wa.me/6282251318377" target="_blank" rel="noopener noreferrer" hidden>WhatsApp us</a>
+      </div>
+    </section>
+    <section class="negative-collection-message" id="negative-collection-message" aria-labelledby="negative-collection-label" hidden>
+      <h2 class="negative-collection-label" id="negative-collection-label"></h2>
+      <p id="negative-collection-copy"></p>
+      <a class="download-reminders-whatsapp" id="negative-collection-whatsapp" href="https://wa.me/6282251318377" target="_blank" rel="noopener noreferrer" hidden>WhatsApp us</a>
+    </section>
+    </div>
+
+    <section id="roll-call-wrap" class="roll-call-invite roll-call-proof" aria-label="Your Roll Call membership" hidden>
       <a id="roll-call-link" class="roll-call-member-link" href="#" rel="noreferrer" hidden>
-        <span class="roll-call-art" aria-hidden="true">
-          <img class="roll-call-art-back" src="roll-call/assets/roll-call-back.png" alt="" width="1223" height="2000" loading="lazy">
-          <span class="roll-call-art-front"><img src="roll-call/assets/roll-call-front.png" alt="" width="1223" height="2000" loading="lazy"><span class="roll-call-art-number" id="roll-call-art-number"></span></span>
+        <span class="roll-call-proof-stage" aria-hidden="true">
+          <span class="roll-call-art">
+            <img class="roll-call-art-back" src="roll-call/assets/roll-call-back.png" alt="" width="1223" height="2000" loading="lazy">
+            <span class="roll-call-art-front"><img src="roll-call/assets/roll-call-front.png" alt="" width="1223" height="2000" loading="lazy"><span class="roll-call-art-number" id="roll-call-art-number"></span></span>
+          </span>
         </span>
         <span class="roll-call-invite-copy">
-          <span class="roll-call-invite-title">ROLL CALL</span>
           <span class="roll-call-invite-label">Member Card</span>
+          <span class="roll-call-invite-title">ROLL CALL</span>
           <span class="roll-call-invite-name" id="roll-call-member-name"></span>
           <span class="roll-call-invite-number" id="roll-call-member-number"></span>
           <span class="roll-call-invite-progress" id="roll-call-member-progress"></span>
-          <span class="roll-call-invite-reward" id="roll-call-member-reward" hidden></span>
+          <span class="roll-call-proof-reward">
+            <span class="roll-call-invite-reward" id="roll-call-member-reward" hidden></span>
+            <span class="roll-call-proof-reward-detail">Free C-41 develop + scan</span>
+          </span>
           <span class="roll-call-invite-action">Open your card <span aria-hidden="true">↗</span></span>
         </span>
       </a>
@@ -678,14 +728,6 @@
         <a id="roll-call-fallback-link" href="#" rel="noreferrer">Open your card ↗</a>
       </div>
     </section>
-
-    <!-- notice -->
-    <div class="notice">
-      <span class="notice-icon">⏳</span>
-      <p>
-        <strong>Your download link is active for 7 days.</strong> Please save your scans before then.
-      </p>
-    </div>
 
     <!-- personal note -->
     <div class="info-section">
@@ -842,9 +884,11 @@
       const collectNegatives = SaujanaNegativeCollection.normalize(params.get('collectNegatives'));
       function showNegatives(choice) {
         const copy = SaujanaNegativeCollection.deliveryCopy(choice);
+        const pickup = SaujanaNegativeCollection.normalize(choice);
         document.getElementById('negative-collection-label').textContent = copy?.title || '';
         document.getElementById('negative-collection-copy').textContent = copy?.body || '';
         document.getElementById('negative-collection-message').hidden = !copy;
+        document.getElementById('negative-collection-whatsapp').hidden = pickup !== 'yes';
       }
       showNegatives(collectNegatives);
       const contactSection = document.getElementById('contact-sheets');
@@ -1157,6 +1201,7 @@
     })();
   </script>
 
-<script src="roll-call-link.js?v=20261101-access"></script>
+<script src="roll-call-link.js?v=20261117-proof"></script>
+<script src="download-countdown.js"></script>
 </body>
 </html>

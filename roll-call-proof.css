@@ -1,0 +1,95 @@
+.roll-call-proof {
+  margin: 24px 0 0;
+  border: 0;
+}
+.roll-call-proof .roll-call-member-link {
+  position: relative;
+  grid-template-columns: minmax(230px, .72fr) minmax(0, 1fr);
+  min-height: 0;
+  max-width: none;
+  gap: 0;
+  padding: 0;
+  margin: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #0b1015;
+  color: #f3f1e7;
+}
+.roll-call-proof .roll-call-member-link::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border: 1px solid #778c9d62;
+  border-left: 3px solid #4e6a85;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.roll-call-proof-stage {
+  display: grid;
+  position: relative;
+  isolation: isolate;
+  place-items: center;
+  min-height: 100%;
+  overflow: hidden;
+  padding: 27px 16px;
+  background-color: #121b24;
+  background-image: radial-gradient(#9fb2c532 .65px, transparent .95px);
+  background-size: 8px 8px;
+}
+.roll-call-proof .roll-call-art { width: 94px; }
+.roll-call-proof .roll-call-art-front { transform: translate(-11px, 0) rotate(-12deg); animation: none; }
+.roll-call-proof .roll-call-art-back { transform: translate(14px, 4px) rotate(11deg); }
+.roll-call-proof .roll-call-art-front::after { display: none; }
+.roll-call-proof .roll-call-invite-copy {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: start;
+  min-width: 0;
+  padding: 23px 25px 23px 30px;
+}
+.roll-call-proof .roll-call-invite-title { color: inherit; font-size: 39px; font-weight: 900; line-height: .94; }
+.roll-call-proof .roll-call-invite-label {
+  color: #f7d485;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  font: 700 11px/1.35 "Courier New", monospace;
+}
+.roll-call-proof .roll-call-invite-name { color: inherit; margin: 12px 0 0; font-size: 14px; }
+.roll-call-proof .roll-call-invite-number { color: inherit; opacity: .8; }
+.roll-call-proof .roll-call-invite-progress { color: inherit; margin: 8px 0 0; font-size: 12px; }
+.roll-call-proof-reward { display: none; }
+.roll-call-proof.has-reward .roll-call-proof-reward {
+  display: grid;
+  margin-top: 5px;
+  padding: 5px 9px;
+  border: 1px dashed #c4ab6c;
+  border-radius: 3px;
+  background: #252924;
+}
+.roll-call-proof.has-reward .roll-call-invite-reward { color: #f7d485; margin: 0; }
+.roll-call-proof.has-reward .roll-call-invite-reward::before { display: none; }
+.roll-call-proof-reward-detail { color: #f3f1e7; font-size: 12px; font-weight: 700; }
+.roll-call-proof .roll-call-invite-action {
+  display: inline-flex;
+  align-items: center;
+  color: #f7d485;
+  border-color: currentColor;
+  margin-top: 12px;
+  font-size: 12px;
+}
+@media (max-width: 560px) {
+  .roll-call-proof .roll-call-member-link { grid-template-columns: minmax(0, 1fr); }
+  .roll-call-proof-stage { padding: 21px 12px; }
+  .roll-call-proof .roll-call-art { width: 75px; }
+  .roll-call-proof .roll-call-invite-copy { padding: 17px 17px 18px; }
+  .roll-call-proof .roll-call-invite-title { font-size: 31px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .roll-call-proof .roll-call-member-link:is(:hover,:focus-visible) .roll-call-art-front { transform: translate(-15px,-4px) rotate(-14deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .roll-call-proof .roll-call-member-link:hover .roll-call-art-front { transform: translate(-11px, 0) rotate(-12deg); }
+  .roll-call-proof .roll-call-member-link:hover .roll-call-art-back { transform: translate(14px, 4px) rotate(11deg); }
+  .roll-call-proof .roll-call-member-link:hover .roll-call-invite-action > span { transform: none; }
+}

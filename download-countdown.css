@@ -1,0 +1,94 @@
+.download-reminders {
+  --reminder-accent: var(--bali-accent, #d8b17b);
+  margin-top: 24px;
+  background: var(--bali-surface, #161616);
+  border: 1px solid var(--bali-line, #393939);
+  border-left: 3px solid var(--reminder-accent);
+  border-radius: 6px;
+  text-align: left;
+  color: var(--bali-paper, #eeece8);
+}
+
+.download-countdown {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr) auto;
+  gap: 20px;
+  align-items: center;
+  padding: 16px 22px;
+}
+
+.download-countdown[hidden], #download-reminder-fallback[hidden],
+.download-reminders-whatsapp[hidden], #download-countdown-date[hidden] { display: none; }
+.download-countdown-filters { position: absolute; pointer-events: none; }
+
+#download-reminders #download-reminder-fallback,
+#download-reminders .negative-collection-message {
+  margin: 0;
+  border: 0;
+  background: transparent;
+  padding: 14px 22px;
+}
+#download-reminders .negative-collection-message:not([hidden]) { border-top: 1px solid var(--bali-line, #393939); }
+.download-reminders :is(.negative-collection-label, .download-countdown-label) { font-family: "Courier New", monospace; }
+.download-reminders .negative-collection-label { font-size: 11px; line-height: 1.4; margin: 0 0 5px; }
+.download-reminders #negative-collection-copy { color: var(--bali-copy, #c8c8c8); }
+.download-reminders:has(#negative-collection-whatsapp:not([hidden])) #download-countdown-action { display: none; }
+
+.download-countdown-mascot { display: grid; place-items: center; }
+.download-countdown-mascot img { width: 82px; height: 88px; object-fit: contain; display: block; filter: grayscale(1); animation: reminder-bob 3.2s ease-in-out 3; }
+[data-negative="colour"] .download-countdown-mascot img { filter: grayscale(1) url(#countdown-ink-colour); }
+[data-negative="classic"] .download-countdown-mascot img { filter: grayscale(1) url(#countdown-ink-classic); }
+[data-negative="bw"] .download-countdown[data-state="active"] .download-countdown-mascot img {
+  filter: grayscale(1) contrast(1.65) brightness(1.15);
+}
+[data-negative="bw"] .download-countdown[data-state="last"] .download-countdown-mascot img {
+  filter: grayscale(1) contrast(1.5) brightness(1.04);
+}
+.download-countdown[data-state="soon"] img { animation: reminder-wag 2.2s ease-in-out 3; }
+.download-countdown[data-state="last"] img { animation: reminder-wag 1.8s ease-in-out 3; }
+.download-countdown[data-state="past"] img { animation: none; opacity: .85; }
+
+.download-countdown .download-countdown-label {
+  color: var(--reminder-accent);
+  font: 700 11px/1.4 "Courier New", monospace;
+  margin-bottom: 5px;
+}
+.download-countdown h2 { color: inherit; font-size: 20px; line-height: 1.2; margin: 0 0 5px; font-weight: 800; }
+.download-countdown-copy p, .download-countdown-copy time { color: var(--bali-copy, #c8c8c8); font-size: 12px; line-height: 1.5; }
+.download-countdown-copy time { display: block; margin-top: 6px; font: 12px/1.4 "Courier New", monospace; }
+.download-countdown-side { display: grid; justify-items: end; gap: 11px; }
+.download-countdown-frames { display: grid; grid-template-columns: repeat(7, 12px); gap: 5px; }
+.download-countdown-frames span { height: 22px; border: 1px solid var(--reminder-accent); opacity: .4; border-radius: 2px; }
+.download-countdown-frames .remaining { opacity: 1; background: var(--reminder-accent); }
+.download-countdown[data-state="last"] .remaining { animation: reminder-pulse 2s ease-in-out 3; }
+.download-reminders-whatsapp:not([hidden]) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  margin-top: 8px;
+  border: 1px solid var(--bali-line, #393939);
+  border-radius: 4px;
+  padding: 4px 11px;
+  color: var(--reminder-accent);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.download-reminders-whatsapp:hover { border-color: currentColor; }
+.download-reminders-whatsapp:focus-visible, #download-btn:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+
+@keyframes reminder-bob { 50% { transform: translateY(-4px); } }
+@keyframes reminder-wag { 40% { transform: translateY(-2px) rotate(-4deg); } 65% { transform: rotate(3deg); } }
+@keyframes reminder-pulse { 50% { opacity: .55; } }
+@media (prefers-reduced-motion: reduce) {
+  .download-countdown[data-state] img, .download-countdown[data-state] .remaining { animation: none; }
+}
+@media (max-width: 560px) {
+  .download-countdown { grid-template-columns: 48px minmax(0, 1fr); gap: 10px 12px; padding: 14px 12px; }
+  .download-countdown-mascot img { width: 48px; height: 60px; }
+  .download-countdown h2 { font-size: 16px; }
+  .download-countdown-side { grid-column: 2; justify-items: start; gap: 5px; }
+  .download-countdown-frames span { height: 16px; }
+  #download-reminders #download-reminder-fallback,
+  #download-reminders .negative-collection-message { padding-inline: 12px; }
+}
